@@ -1,10 +1,21 @@
 language: python
 python:
   - "3.9.5"  # 3.9.5 main branch
-# command to install dependencies
+
 install:
   - pip install -r requirements.txt
-# command to run tests
+
 script:
   - export PYTHONPATH="${PYTHONPATH}:./:../"
-  - pytest
+  - pytest --cov=project
+
+  - curl https://keybase.io/codecovsecurity/pgp_keys.asc | gpg --no-default-keyring --keyring trustedkeys.gpg --import # One-time step
+  - curl -Os https://uploader.codecov.io/latest/linux/codecov
+  - curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM
+  - curl -Os https://uploader.codecov.io/latest/linux/codecov.SHA256SUM.sig
+  - gpgv codecov.SHA256SUM.sig codecov.SHA256SUM
+  - shasum -a 256 -c codecov.SHA256SUM
+
+after_success:
+  - chmod +x codecov
+  - ./codecov -t ${CODECOV_TOKEN}
