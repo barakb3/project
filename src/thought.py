@@ -49,13 +49,11 @@ class Thought:
             '<{}s'.format(thought_len),
             data[20:],
         )[0].decode("utf-8")
-        # return Thought(user_id,dt.datetime.fromtimestamp(timestamp),thought)
         return Thought(
             user_id,
             dt.datetime.fromtimestamp(
                 timestamp,
-                # Uncomment to pass it in CI.
-                # tz=dt.timezone.utc,
+                tz=dt.timezone.utc,
             ),
             thought,
         )
