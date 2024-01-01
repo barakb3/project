@@ -39,8 +39,16 @@ def get_message():
 def test_connection(get_message):
     host, port = _SERVER_ADDRESS
     subprocess.Popen(
-        ['python', '-m', 'project', 'upload-thought', f'{host}:{port}', f'{_USER_1}', _THOUGHT_1],
-        stdout = subprocess.PIPE,
+        [
+            'python',
+            '-m',
+            'project',
+            'upload-thought',
+            f'{host}:{port}',
+            f'{_USER_1}',
+            _THOUGHT_1,
+        ],
+        stdout=subprocess.PIPE,
     )
     message = get_message()
     assert message
@@ -49,14 +57,30 @@ def test_connection(get_message):
 def test_user_id(get_message):
     host, port = _SERVER_ADDRESS
     subprocess.Popen(
-        ['python', '-m', 'project', 'upload-thought', f'{host}:{port}', f'{_USER_1}', _THOUGHT_1],
-        stdout = subprocess.PIPE,
+        [
+            'python',
+            '-m',
+            'project',
+            'upload-thought',
+            f'{host}:{port}',
+            f'{_USER_1}',
+            _THOUGHT_1,
+        ],
+        stdout=subprocess.PIPE,
     )
     user_id, timestamp, thought = get_message()
     assert user_id == _USER_1
     subprocess.Popen(
-        ['python', '-m', 'project', 'upload-thought', f'{host}:{port}', f'{_USER_2}', _THOUGHT_1],
-        stdout = subprocess.PIPE,
+        [
+            'python',
+            '-m',
+            'project',
+            'upload-thought',
+            f'{host}:{port}',
+            f'{_USER_2}',
+            _THOUGHT_1,
+        ],
+        stdout=subprocess.PIPE,
     )
     user_id, timestamp, thought = get_message()
     assert user_id == _USER_2
@@ -65,14 +89,30 @@ def test_user_id(get_message):
 def test_timestamp(get_message):
     host, port = _SERVER_ADDRESS
     subprocess.Popen(
-        ['python', '-m', 'project', 'upload-thought', f'{host}:{port}', f'{_USER_1}', _THOUGHT_1],
-        stdout = subprocess.PIPE,
+        [
+            'python',
+            '-m',
+            'project',
+            'upload-thought',
+            f'{host}:{port}',
+            f'{_USER_1}',
+            _THOUGHT_1,
+        ],
+        stdout=subprocess.PIPE,
     )
     user_id, timestamp, thought = get_message()
     _assert_now(timestamp)
     subprocess.Popen(
-        ['python', '-m', 'project', 'upload-thought', f'{host}:{port}', f'{_USER_2}', _THOUGHT_2],
-        stdout = subprocess.PIPE,
+        [
+            'python',
+            '-m',
+            'project',
+            'upload-thought',
+            f'{host}:{port}',
+            f'{_USER_2}',
+            _THOUGHT_2,
+        ],
+        stdout=subprocess.PIPE,
     )
     user_id, timestamp, thought = get_message()
     _assert_now(timestamp)
@@ -81,14 +121,30 @@ def test_timestamp(get_message):
 def test_thought(get_message):
     host, port = _SERVER_ADDRESS
     subprocess.Popen(
-        ['python', '-m', 'project', 'upload-thought', f'{host}:{port}', f'{_USER_1}', _THOUGHT_1],
-        stdout = subprocess.PIPE,
+        [
+            'python',
+            '-m',
+            'project',
+            'upload-thought',
+            f'{host}:{port}',
+            f'{_USER_1}',
+            _THOUGHT_1,
+        ],
+        stdout=subprocess.PIPE,
     )
     user_id, timestamp, thought = get_message()
     assert thought == _THOUGHT_1
     subprocess.Popen(
-        ['python', '-m', 'project', 'upload-thought', f'{host}:{port}', f'{_USER_1}', _THOUGHT_2],
-        stdout = subprocess.PIPE,
+        [
+            'python',
+            '-m',
+            'project',
+            'upload-thought',
+            f'{host}:{port}',
+            f'{_USER_1}',
+            _THOUGHT_2,
+        ],
+        stdout=subprocess.PIPE,
     )
     user_id, timestamp, thought = get_message()
     assert thought == _THOUGHT_2

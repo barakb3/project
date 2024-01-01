@@ -4,15 +4,16 @@ import subprocess
 def test_run_server():
     process = subprocess.Popen(
         ['python', '-m', 'project', 'run-server'],
-        stderr = subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
     _, stderr = process.communicate()
     assert b'missing argument' in stderr.lower()
 
+
 def test_run_webserver():
     process = subprocess.Popen(
         ['python', '-m', 'project', 'run-webserver'],
-        stderr = subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
     _, stderr = process.communicate()
     assert b'missing argument' in stderr.lower()
@@ -21,7 +22,7 @@ def test_run_webserver():
 def test_upload_thought():
     process = subprocess.Popen(
         ['python', '-m', 'project', 'upload-thought'],
-        stderr = subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
     _, stderr = process.communicate()
     assert b'missing argument' in stderr.lower()

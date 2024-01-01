@@ -16,8 +16,15 @@ _DATA_DIR_PATH = pathlib.Path(__file__).absolute().parent / 'tests' / 'data'
 def server_process():
     host, port = _SERVER_ADDRESS
     process = subprocess.Popen(
-        ['python', '-m', 'project', 'run-server', f'{host}:{port}', _DATA_DIR_PATH],
-        stdout = subprocess.PIPE,
+        [
+            'python',
+            '-m',
+            'project',
+            'run-server',
+            f'{host}:{port}',
+            _DATA_DIR_PATH,
+        ],
+        stdout=subprocess.PIPE,
     )
     return process
 
