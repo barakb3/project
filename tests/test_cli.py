@@ -3,29 +3,29 @@ import subprocess
 
 def test_run_server():
     process = subprocess.Popen(
-        ['python', '-m', 'project', 'run-server'],
+        ["python", "-m", "project", "run-server"],
         stderr=subprocess.PIPE,
     )
     _, stderr = process.communicate()
-    assert b'missing argument' in stderr.lower()
+    assert b"missing argument" in stderr.lower()
 
 
 def test_run_webserver():
     process = subprocess.Popen(
-        ['python', '-m', 'project', 'run-webserver'],
+        ["python", "-m", "project", "run-webserver"],
         stderr=subprocess.PIPE,
     )
     _, stderr = process.communicate()
-    assert b'missing argument' in stderr.lower()
+    assert b"missing argument" in stderr.lower()
 
 
 def test_upload_thought():
     process = subprocess.Popen(
-        ['python', '-m', 'project', 'upload-thought'],
+        ["python", "-m", "project", "upload-thought"],
         stderr=subprocess.PIPE,
     )
     _, stderr = process.communicate()
-    assert b'missing argument' in stderr.lower()
+    assert b"missing argument" in stderr.lower()
 
 
 # @contextlib.contextmanager

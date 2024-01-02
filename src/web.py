@@ -48,16 +48,16 @@ def get_users(data_dir):
 
 
 @click.command()
-@click.argument('address')
-@click.argument('data_dir', type=click.Path(exists=True))
+@click.argument("address")
+@click.argument("data_dir", type=click.Path(exists=True))
 def run_webserver(address, data_dir):
-    @website.route('/')
+    @website.route("/")
     def index():
         users = get_users(data_dir)
-        index_html = _INDEX_HTML.format(users='\n'.join(users))
+        index_html = _INDEX_HTML.format(users="\n".join(users))
         return index_html
 
-    @website.route('/users/1')
+    @website.route("/users/1")
     def user1():
         user_dir_path = Path(data_dir) / "1"
         thoughts = []
@@ -70,10 +70,10 @@ def run_webserver(address, data_dir):
                                     + thought_file.name[17:19],
                                     thought=thought_file.read_text())
                             )
-        user_html = _USER_HTML.format(id="1", thoughts='\n'.join(thoughts))
+        user_html = _USER_HTML.format(id="1", thoughts="\n".join(thoughts))
         return user_html
 
-    @website.route('/users/2')
+    @website.route("/users/2")
     def user2():
         user_dir_path = Path(data_dir) / "2"
         thoughts = []
@@ -86,10 +86,10 @@ def run_webserver(address, data_dir):
                                     + thought_file.name[17:19],
                                     thought=thought_file.read_text())
                             )
-        user_html = _USER_HTML.format(id="2", thoughts='\n'.join(thoughts))
+        user_html = _USER_HTML.format(id="2", thoughts="\n".join(thoughts))
         return user_html
 
-    @website.route('/users/3')
+    @website.route("/users/3")
     def user3():
         user_dir_path = Path(data_dir) / "3"
         thoughts = []
@@ -102,10 +102,10 @@ def run_webserver(address, data_dir):
                                     + thought_file.name[17:19],
                                     thought=thought_file.read_text())
                             )
-        user_html = _USER_HTML.format(id="3", thoughts='\n'.join(thoughts))
+        user_html = _USER_HTML.format(id="3", thoughts="\n".join(thoughts))
         return user_html
 
-    @website.route('/users/4')
+    @website.route("/users/4")
     def user4():
         user_dir_path = Path(data_dir) / "4"
         thoughts = []
@@ -118,10 +118,10 @@ def run_webserver(address, data_dir):
                                     + thought_file.name[17:19],
                                     thought=thought_file.read_text())
                             )
-        user_html = _USER_HTML.format(id="4", thoughts='\n'.join(thoughts))
+        user_html = _USER_HTML.format(id="4", thoughts="\n".join(thoughts))
         return user_html
 
-    @website.route('/users/5')
+    @website.route("/users/5")
     def user5():
         user_dir_path = Path(data_dir) / "5"
         thoughts = []
@@ -134,7 +134,7 @@ def run_webserver(address, data_dir):
                                     + thought_file.name[17:19],
                                     thought=thought_file.read_text())
                             )
-        user_html = _USER_HTML.format(id="5", thoughts='\n'.join(thoughts))
+        user_html = _USER_HTML.format(id="5", thoughts="\n".join(thoughts))
         return user_html
 
     ip, port = address.split(":", 1)
