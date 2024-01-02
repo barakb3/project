@@ -4,7 +4,7 @@ from .connection import Connection
 
 
 class Listener:
-    def __init__(self, port, host='0.0.0.0', backlog=1000, reuseaddr=True):
+    def __init__(self, port, host="0.0.0.0", backlog=1000, reuseaddr=True):
         self.port = port
         self.host = host
         self.backlog = backlog
@@ -15,10 +15,10 @@ class Listener:
         self.s.bind((self.host, self.port))
 
     def __repr__(self):
-        return ((f'{self.__class__.__name__}(port={self.port}, '
-                 f'host=\'{self.host}\', '
-                 f' backlog={self.backlog}, '
-                 f'reuseaddr={self.reuseaddr}'))
+        return ((f"{self.__class__.__name__}(port={self.port}, "
+                 f"host=\"{self.host}\", "
+                 f" backlog={self.backlog}, "
+                 f"reuseaddr={self.reuseaddr}"))
 
     def start(self):
         self.s.listen(self.backlog)

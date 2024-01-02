@@ -8,8 +8,8 @@ import time
 import pytest
 
 
-_SERVER_ADDRESS = '127.0.0.1', 5000
-_DATA_DIR_PATH = pathlib.Path(__file__).absolute().parent / 'tests' / 'data'
+_SERVER_ADDRESS = "127.0.0.1", 5000
+_DATA_DIR_PATH = pathlib.Path(__file__).absolute().parent / "tests" / "data"
 
 
 @pytest.fixture
@@ -17,11 +17,11 @@ def server_process():
     host, port = _SERVER_ADDRESS
     process = subprocess.Popen(
         [
-            'python',
-            '-m',
-            'project',
-            'run-server',
-            f'{host}:{port}',
+            "python",
+            "-m",
+            "project",
+            "run-server",
+            f"{host}:{port}",
             _DATA_DIR_PATH,
         ],
         stdout=subprocess.PIPE,

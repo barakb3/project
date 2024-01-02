@@ -37,21 +37,21 @@ class Handler(threading.Thread):
             raise Exception("Incomplete meta data received.")
 
     def write_thought(self):
-        dir_path = self.data_dir_path / f'{self.thought.user_id}'
+        dir_path = self.data_dir_path / f"{self.thought.user_id}"
         dir_path.mkdir(parents=True, exist_ok=True)
         file_path = \
-            dir_path / f'{self.thought.timestamp:%Y-%m-%d_%H-%M-%S}.txt'
+            dir_path / f"{self.thought.timestamp:%Y-%m-%d_%H-%M-%S}.txt"
         file_path.touch()
-        with file_path.open(mode='r+') as f:
-            if f.read() == '':
-                f.write(f'{self.thought.thought}')
+        with file_path.open(mode="r+") as f:
+            if f.read() == "":
+                f.write(f"{self.thought.thought}")
             else:
-                f.write(f'\n{self.thought.thought}')
+                f.write(f"\n{self.thought.thought}")
 
 
 @click.command()
-@click.argument('address')
-@click.argument('data_dir')
+@click.argument("address")
+@click.argument("data_dir")
 def run_server(address, data_dir):
     ip, port = address.split(":", 1)
     signal.SIGINT

@@ -9,8 +9,8 @@ class Connection:
         self.peer_ip, self.peer_port = self.conn.getpeername()
 
     def __repr__(self):
-        return ((f'<Connection from {self.ip}:{self.port} '
-                 f'to {self.peer_ip}:{self.peer_port}>'))
+        return ((f"<Connection from {self.ip}:{self.port} "
+                 f"to {self.peer_ip}:{self.peer_port}>"))
 
     def send(self, data):
         self.conn.sendall(data)

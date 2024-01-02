@@ -7,10 +7,10 @@ import time
 import pytest
 
 
-_SERVER_ADDRESS = '127.0.0.1', 5000
+_SERVER_ADDRESS = "127.0.0.1", 5000
 _SERVER_BACKLOG = 1000
 
-_HEADER_FORMAT = 'LLI'
+_HEADER_FORMAT = "LLI"
 _HEADER_SIZE = struct.calcsize(_HEADER_FORMAT)
 
 _USER_1 = 1
@@ -40,12 +40,12 @@ def test_connection(get_message):
     host, port = _SERVER_ADDRESS
     subprocess.Popen(
         [
-            'python',
-            '-m',
-            'project',
-            'upload-thought',
-            f'{host}:{port}',
-            f'{_USER_1}',
+            "python",
+            "-m",
+            "project",
+            "upload-thought",
+            f"{host}:{port}",
+            f"{_USER_1}",
             _THOUGHT_1,
         ],
         stdout=subprocess.PIPE,
@@ -58,12 +58,12 @@ def test_user_id(get_message):
     host, port = _SERVER_ADDRESS
     subprocess.Popen(
         [
-            'python',
-            '-m',
-            'project',
-            'upload-thought',
-            f'{host}:{port}',
-            f'{_USER_1}',
+            "python",
+            "-m",
+            "project",
+            "upload-thought",
+            f"{host}:{port}",
+            f"{_USER_1}",
             _THOUGHT_1,
         ],
         stdout=subprocess.PIPE,
@@ -72,12 +72,12 @@ def test_user_id(get_message):
     assert user_id == _USER_1
     subprocess.Popen(
         [
-            'python',
-            '-m',
-            'project',
-            'upload-thought',
-            f'{host}:{port}',
-            f'{_USER_2}',
+            "python",
+            "-m",
+            "project",
+            "upload-thought",
+            f"{host}:{port}",
+            f"{_USER_2}",
             _THOUGHT_1,
         ],
         stdout=subprocess.PIPE,
@@ -90,12 +90,12 @@ def test_timestamp(get_message):
     host, port = _SERVER_ADDRESS
     subprocess.Popen(
         [
-            'python',
-            '-m',
-            'project',
-            'upload-thought',
-            f'{host}:{port}',
-            f'{_USER_1}',
+            "python",
+            "-m",
+            "project",
+            "upload-thought",
+            f"{host}:{port}",
+            f"{_USER_1}",
             _THOUGHT_1,
         ],
         stdout=subprocess.PIPE,
@@ -104,12 +104,12 @@ def test_timestamp(get_message):
     _assert_now(timestamp)
     subprocess.Popen(
         [
-            'python',
-            '-m',
-            'project',
-            'upload-thought',
-            f'{host}:{port}',
-            f'{_USER_2}',
+            "python",
+            "-m",
+            "project",
+            "upload-thought",
+            f"{host}:{port}",
+            f"{_USER_2}",
             _THOUGHT_2,
         ],
         stdout=subprocess.PIPE,
@@ -122,12 +122,12 @@ def test_thought(get_message):
     host, port = _SERVER_ADDRESS
     subprocess.Popen(
         [
-            'python',
-            '-m',
-            'project',
-            'upload-thought',
-            f'{host}:{port}',
-            f'{_USER_1}',
+            "python",
+            "-m",
+            "project",
+            "upload-thought",
+            f"{host}:{port}",
+            f"{_USER_1}",
             _THOUGHT_1,
         ],
         stdout=subprocess.PIPE,
@@ -136,12 +136,12 @@ def test_thought(get_message):
     assert thought == _THOUGHT_1
     subprocess.Popen(
         [
-            'python',
-            '-m',
-            'project',
-            'upload-thought',
-            f'{host}:{port}',
-            f'{_USER_1}',
+            "python",
+            "-m",
+            "project",
+            "upload-thought",
+            f"{host}:{port}",
+            f"{_USER_1}",
             _THOUGHT_2,
         ],
         stdout=subprocess.PIPE,
@@ -155,7 +155,7 @@ def _run_server(pipe):
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind(_SERVER_ADDRESS)
     server.listen(_SERVER_BACKLOG)
-    pipe.send('ready')
+    pipe.send("ready")
     with server:
         while True:
             connection, address = server.accept()
@@ -176,10 +176,10 @@ def _receive_all(connection, size):
     while size > 0:
         chunk = connection.recv(size)
         if not chunk:
-            raise RuntimeError('incomplete data')
+            raise RuntimeError("incomplete data")
         chunks.append(chunk)
         size -= len(chunk)
-    return b''.join(chunks)
+    return b"".join(chunks)
 
 
 def _assert_now(timestamp):

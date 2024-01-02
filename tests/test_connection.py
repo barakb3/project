@@ -13,7 +13,7 @@ _PORT = 5000
 def server():
     server = socket.socket()
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server.bind(('0.0.0.0', _PORT))
+    server.bind(("0.0.0.0", _PORT))
     server.listen(1000)
     try:
         time.sleep(0.1)
@@ -24,7 +24,7 @@ def server():
 
 def test_context_manager(server):
     sock = socket.socket()
-    sock.connect(('127.0.0.1', _PORT))
+    sock.connect(("127.0.0.1", _PORT))
     connection = Connection(sock)
     with connection:
         assert not sock._closed
@@ -32,5 +32,5 @@ def test_context_manager(server):
 
 
 def test_connect(server):
-    with Connection.connect('127.0.0.1', _PORT) as connection:
+    with Connection.connect("127.0.0.1", _PORT) as connection:
         server.accept()
