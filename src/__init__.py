@@ -4,8 +4,8 @@ from .thought import Thought
 from .client import upload_thought
 
 __all__ = [
-    run_server,
-    run_webserver,
-    Thought,
-    upload_thought,
+    "run_server",
+    "run_webserver",
+    "Thought",
+    "upload_thought",
 ]
