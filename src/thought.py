@@ -3,6 +3,9 @@ import struct
 
 
 class Thought:
+    """
+    A class representing a thought.
+    """
     def __init__(self, user_id, timestamp, thought):
         self.user_id = user_id
         self.timestamp = timestamp

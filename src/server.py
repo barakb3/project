@@ -53,6 +53,16 @@ class Handler(threading.Thread):
 @click.argument("address")
 @click.argument("data_dir")
 def run_server(address, data_dir):
+    """
+    Runs a server that serves some data directory.
+    Can be stopped by `Ctrl+C`.
+
+    :param address: A host and a port, e.g.: 127.0.0.1:5000.
+    :type address: str
+    :param data_dir: A path to the data directory the server will serve.
+    :type data_dir: str ot Path-like objects
+
+    """
     ip, port = address.split(":", 1)
     signal.SIGINT
     with Listener(port=int(port), host=ip) as listener:
