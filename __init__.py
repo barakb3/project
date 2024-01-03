@@ -1,4 +1,6 @@
 import src
+import tests
+
 from .src import run_server, run_webserver, Thought, upload_thought
 
 __all__ = [
