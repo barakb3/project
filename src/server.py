@@ -53,6 +53,16 @@ class Handler(threading.Thread):
             else:
                 f.write(f"\n{self.thought.thought}")
 
+    # @parser("translation")
+    def parse_translation(context, snapshot):
+        # TODO: implement this class as part of exercise 6.
+        pass
+
+    # @parser("color_image")
+    def parse_color_image(context, snapshot):
+        # TODO: implement this class as part of exercise 6.
+        pass
+
 
 @click.command()
 @click.argument("address")

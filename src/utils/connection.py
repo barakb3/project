@@ -15,6 +15,10 @@ class Connection:
     def send(self, data: bytes):
         self.conn.sendall(data)
 
+    def send_message(message):
+        # TODO: Implement this function as part of exercise 6.
+        pass
+
     def receive(self, size: int) -> bytes:
         msg = self.conn.recv(size)
         print(msg)
@@ -22,6 +26,10 @@ class Connection:
         #     raise Exception(f"Connection was closed \
         #                     before all data was received. {len(msg)} {size}")
         return msg
+
+    def receive_message(message):
+        # TODO: Implement this function as part of exercise 6.
+        pass
 
     def close(self):
         self.conn.close()
