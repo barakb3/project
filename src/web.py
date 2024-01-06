@@ -52,7 +52,9 @@ def get_users(data_dir):
 @click.argument("data_dir", type=click.Path(exists=True))
 def run_webserver(address, data_dir):
     """
-    Creates a web page for the server that serves some data directory in which the user numbers can be found, and each one of them holds the thoughts of this user.
+    Creates a web page for the server that serves some data directory in which
+    the user numbers can be found, and each one of them holds the thoughts of
+    this user.
     Currently works only for at most 5 users.
 
     :param address: A host and a port, e.g.: 127.0.0.1:5000.
