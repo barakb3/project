@@ -10,6 +10,8 @@ env:
 
 script:
   - pytest --cov
+  - flake8 src
+  - flake8 ./*.py
 
 after_success:
   # Integrity Checking and downloading the Codecov Uploader.
