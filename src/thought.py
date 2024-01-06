@@ -6,12 +6,12 @@ class Thought:
     """
     A class representing a thought.
     """
-    def __init__(self, user_id, timestamp, thought):
+    def __init__(self, user_id: str, timestamp: dt.datetime, thought: str):
         self.user_id = user_id
         self.timestamp = timestamp
         self.thought = thought
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return (
             f"{self.__class__.__name__}"
             f"(user_id={self.user_id!r}, "
@@ -19,20 +19,20 @@ class Thought:
             f"thought={self.thought!r})"
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"[{self.timestamp:%Y-%m-%d %H:%M:%S}] "
             f"user {self.user_id}: {self.thought}"
         )
 
-    def __eq__(self, other):
+    def __eq__(self, other: "Thought") -> bool:
         if not isinstance(other, Thought):
             return NotImplemented
         return self.user_id == other.user_id and \
             self.timestamp == other.timestamp and \
             self.thought == other.thought
 
-    def serialize(self):
+    def serialize(self) -> bytes:
         encoded_thought = bytes(self.thought, "utf-8")
         return struct.pack(
             "<QQI{}s".format(len(encoded_thought)),
@@ -42,7 +42,7 @@ class Thought:
             encoded_thought,
         )
 
-    def deserialize(data):
+    def deserialize(data: bytes) -> "Thought":
         user_id = struct.unpack("<Q", data[:8])[0]
         timestamp = struct.unpack("<Q", data[8:16])[0]
         thought_len = struct.unpack("<I", data[16:20])[0]

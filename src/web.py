@@ -39,7 +39,7 @@ _THOUGHT_LINE_HTML = '''
 website = Flask(__name__)
 
 
-def get_users(data_dir):
+def get_users(data_dir: str) -> list:
     data_dir_path = Path(data_dir)
     users = []
     for user_dir in data_dir_path.iterdir():
@@ -50,7 +50,7 @@ def get_users(data_dir):
 @click.command()
 @click.argument("address")
 @click.argument("data_dir", type=click.Path(exists=True))
-def run_webserver(address, data_dir):
+def run_webserver(address: str, data_dir: str):
     """
     Creates a web page for the server that serves some data directory in which
     the user numbers can be found, and each one of them holds the thoughts of

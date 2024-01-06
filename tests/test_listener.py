@@ -17,7 +17,7 @@ def listener():
     return Listener(_PORT, host=_HOST, backlog=_BACKLOG, reuseaddr=_REUSEADDR)
 
 
-def test_context_manager(listener):
+def test_context_manager(listener: Listener):
     assert socket.socket().connect_ex((_HOST, _PORT)) != 0
     with listener:
         time.sleep(0.1)

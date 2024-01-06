@@ -19,26 +19,26 @@ def t():
     return Thought(user_id, datetime, thought)
 
 
-def test_attributes(t):
+def test_attributes(t: Thought):
     assert t.user_id == user_id
     assert t.timestamp == datetime
     assert t.thought == thought
 
 
-def test_repr(t):
+def test_repr(t: Thought):
     assert repr(t) == (
         f"Thought(user_id={user_id!r}, "
         f"timestamp={datetime!r}, thought={thought!r})"
     )
 
 
-def test_str(t):
+def test_str(t: Thought):
     assert str(t) == (
         f"[{datetime:%Y-%m-%d %H:%M:%S}] user {user_id}: {thought}"
     )
 
 
-def test_eq(t):
+def test_eq(t: Thought):
     t1 = Thought(user_id, datetime, thought)
     assert t1 == t
     t2 = Thought(user_id + 1, datetime, thought)
@@ -49,23 +49,23 @@ def test_eq(t):
     assert t4 != t
     t5 = 1
     assert t5 != t
-    t6 = lambda: None
+    t6: Thought = lambda: None
     t6.user_id = user_id
     t6.timestamp = datetime
     t6.thought = thought
     assert t6 != t
 
 
-def test_serialize(t):
+def test_serialize(t: Thought):
     assert t.serialize() == serialized
 
 
-def test_deserialize(t):
+def test_deserialize(t: Thought):
     t = Thought.deserialize(serialized)
     assert t.user_id == user_id
     assert t.timestamp == datetime
     assert t.thought == thought
 
 
-def test_symmetry(t):
+def test_symmetry(t: Thought):
     assert Thought.deserialize(t.serialize()) == t
