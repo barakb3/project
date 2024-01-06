@@ -65,7 +65,7 @@ def run_webserver(address: str, data_dir: str):
     """
     @website.route("/")
     def index():
-        users = get_users(data_dir)
+        users = get_users(data_dir=data_dir)
         index_html = _INDEX_HTML.format(users="\n".join(users))
         return index_html
 

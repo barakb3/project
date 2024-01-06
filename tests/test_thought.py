@@ -15,8 +15,8 @@ serialized = (
 
 
 @pytest.fixture
-def t():
-    return Thought(user_id, datetime, thought)
+def t() -> Thought:
+    return Thought(user_id=user_id, timestamp=datetime, thought=thought)
 
 
 def test_attributes(t: Thought):
@@ -39,13 +39,13 @@ def test_str(t: Thought):
 
 
 def test_eq(t: Thought):
-    t1 = Thought(user_id, datetime, thought)
+    t1 = Thought(user_id=user_id, timestamp=datetime, thought=thought)
     assert t1 == t
-    t2 = Thought(user_id + 1, datetime, thought)
+    t2 = Thought(user_id=user_id + 1, timestamp=datetime, thought=thought)
     assert t2 != t
-    t3 = Thought(user_id, datetime + dt.timedelta(minutes=1), thought)
+    t3 = Thought(user_id=user_id, timestamp=datetime + dt.timedelta(minutes=1), thought=thought)
     assert t3 != t
-    t4 = Thought(user_id, datetime, thought + "!")
+    t4 = Thought(user_id=user_id, timestamp=datetime, thought=thought + "!")
     assert t4 != t
     t5 = 1
     assert t5 != t
@@ -61,11 +61,11 @@ def test_serialize(t: Thought):
 
 
 def test_deserialize(t: Thought):
-    t = Thought.deserialize(serialized)
+    t = Thought.deserialize(data=serialized)
     assert t.user_id == user_id
     assert t.timestamp == datetime
     assert t.thought == thought
 
 
 def test_symmetry(t: Thought):
-    assert Thought.deserialize(t.serialize()) == t
+    assert Thought.deserialize(data=t.serialize()) == t

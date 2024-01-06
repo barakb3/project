@@ -25,12 +25,12 @@ def server():
 def test_context_manager(server: socket.socket):
     sock = socket.socket()
     sock.connect(("127.0.0.1", _PORT))
-    connection = Connection(sock)
+    connection = Connection(conn=sock)
     with connection:
         assert not sock._closed
     assert sock._closed
 
 
 def test_connect(server: socket.socket):
-    with Connection.connect("127.0.0.1", _PORT) as connection:
+    with Connection.connect(host="127.0.0.1", port=_PORT) as connection:
         server.accept()

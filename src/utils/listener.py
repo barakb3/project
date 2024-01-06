@@ -34,7 +34,7 @@ class Listener:
 
     def accept(self) -> Connection:
         client, address = self.s.accept()
-        return Connection(client)
+        return Connection(conn=client)
 
     def __enter__(self) -> "Listener":
         self.start()

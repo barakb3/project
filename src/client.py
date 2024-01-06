@@ -22,7 +22,7 @@ def upload_thought(address: str, user_id: str, thought: str):
 
     """
     ip, port = address.split(":", 1)
-    t = Thought(user_id, dt.datetime.now(), thought)
-    with Connection.connect(ip, int(port)) as connection:
+    t = Thought(user_id=user_id, timestamp=dt.datetime.now(), thought=thought)
+    with Connection.connect(host=ip, port=int(port)) as connection:
         connection.send(t.serialize())
     print("done")

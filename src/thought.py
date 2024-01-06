@@ -53,10 +53,10 @@ class Thought:
             data[20:],
         )[0].decode("utf-8")
         return Thought(
-            user_id,
-            dt.datetime.fromtimestamp(
+            user_id=user_id,
+            timestamp=dt.datetime.fromtimestamp(
                 timestamp,
                 tz=dt.timezone.utc,
             ),
-            thought,
+            thought=thought,
         )

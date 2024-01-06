@@ -101,7 +101,7 @@ def test_timestamp(get_message):
         stdout=subprocess.PIPE,
     )
     user_id, timestamp, thought = get_message()
-    _assert_now(timestamp)
+    _assert_now(timestamp=timestamp)
     subprocess.Popen(
         [
             "python",
@@ -115,7 +115,7 @@ def test_timestamp(get_message):
         stdout=subprocess.PIPE,
     )
     user_id, timestamp, thought = get_message()
-    _assert_now(timestamp)
+    _assert_now(timestamp=timestamp)
 
 
 def test_thought(get_message):
@@ -159,14 +159,14 @@ def _run_server(pipe):
     with server:
         while True:
             connection, address = server.accept()
-            _handle_connection(connection, pipe)
+            _handle_connection(connection=connection, pipe=pipe)
 
 
 def _handle_connection(connection: socket.socket, pipe):
     with connection:
-        header_data = _receive_all(connection, _HEADER_SIZE)
+        header_data = _receive_all(connection=connection, size=_HEADER_SIZE)
         user_id, timestamp, size = struct.unpack(_HEADER_FORMAT, header_data)
-        data = _receive_all(connection, size)
+        data = _receive_all(connection=connection, size=size)
         thought = data.decode()
         pipe.send([user_id, timestamp, thought])
 
