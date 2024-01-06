@@ -36,4 +36,4 @@ class Connection:
         conn = socket.socket()
         time.sleep(0.1)  # Wait for server to start listening.
         conn.connect((host, port))
-        return Connection(conn)
+        return Connection(conn=conn)

@@ -25,7 +25,7 @@ class Handler(threading.Thread):
         msg = self.read_message()
         if len(msg) < 20:
             raise Exception("Incomplete meta data received.")
-        self.thought = Thought.deserialize(msg)
+        self.thought = Thought.deserialize(data=msg)
         self.lock.acquire()
         self.write_thought()
         self.lock.release()
@@ -74,5 +74,5 @@ def run_server(address: str, data_dir: str):
         lock = threading.Lock()
         while True:
             client = listener.accept()
-            newthread = Handler(client, data_dir, lock)
+            newthread = Handler(client=client, data_dir=data_dir, lock=lock)
             newthread.start()
