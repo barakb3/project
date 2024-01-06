@@ -4,7 +4,13 @@ from .connection import Connection
 
 
 class Listener:
-    def __init__(self, port, host="0.0.0.0", backlog=1000, reuseaddr=True):
+    def __init__(
+            self,
+            port: str,
+            host: str = "0.0.0.0",
+            backlog: int = 1000,
+            reuseaddr: bool = True
+    ):
         self.port = port
         self.host = host
         self.backlog = backlog
@@ -14,7 +20,7 @@ class Listener:
             self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind((self.host, self.port))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return ((f"{self.__class__.__name__}(port={self.port}, "
                  f"host=\"{self.host}\", "
                  f" backlog={self.backlog}, "
@@ -26,11 +32,11 @@ class Listener:
     def stop(self):
         self.s.close()
 
-    def accept(self):
+    def accept(self) -> Connection:
         client, address = self.s.accept()
         return Connection(client)
 
-    def __enter__(self):
+    def __enter__(self) -> "Listener":
         self.start()
         return self
 

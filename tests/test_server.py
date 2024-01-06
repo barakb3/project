@@ -29,7 +29,7 @@ def server_process():
     return process
 
 
-def test_connection(server_process):
+def test_connection(server_process: subprocess.Popen):
     thread = threading.Thread(target=server_process.communicate)
     thread.start()
     time.sleep(0.5)

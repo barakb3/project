@@ -4,17 +4,22 @@ import signal
 import threading
 
 from src.thought import Thought
-from src.utils import Listener
+from src.utils import Connection, Listener
 
 
 class Handler(threading.Thread):
-    def __init__(self, client, data_dir, lock):
+    def __init__(
+            self,
+            client: Connection,
+            data_dir: str,
+            lock: threading.Lock
+    ):
         super().__init__()
         self.client = client
         self.data_dir_path = Path(data_dir)
         self.lock = lock
-        self.msg = None
-        self.thought = None
+        self.msg: bytearray = None
+        self.thought: Thought = None
 
     def run(self):
         msg = self.read_message()
@@ -26,7 +31,7 @@ class Handler(threading.Thread):
         self.lock.release()
         self.client.close()
 
-    def read_message(self):
+    def read_message(self) -> bytearray:
         msg = bytearray(self.client.receive(1024))
         while (cont_msg := self.client.receive(1024)):
             msg += cont_msg
@@ -52,7 +57,7 @@ class Handler(threading.Thread):
 @click.command()
 @click.argument("address")
 @click.argument("data_dir")
-def run_server(address, data_dir):
+def run_server(address: str, data_dir: str):
     """
     Runs a server that serves some data directory.
     Can be stopped by `Ctrl+C`.

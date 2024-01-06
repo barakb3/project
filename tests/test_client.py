@@ -162,7 +162,7 @@ def _run_server(pipe):
             _handle_connection(connection, pipe)
 
 
-def _handle_connection(connection, pipe):
+def _handle_connection(connection: socket.socket, pipe):
     with connection:
         header_data = _receive_all(connection, _HEADER_SIZE)
         user_id, timestamp, size = struct.unpack(_HEADER_FORMAT, header_data)
@@ -171,7 +171,7 @@ def _handle_connection(connection, pipe):
         pipe.send([user_id, timestamp, thought])
 
 
-def _receive_all(connection, size):
+def _receive_all(connection: socket.socket, size: int):
     chunks = []
     while size > 0:
         chunk = connection.recv(size)
@@ -182,6 +182,6 @@ def _receive_all(connection, size):
     return b"".join(chunks)
 
 
-def _assert_now(timestamp):
+def _assert_now(timestamp: time.time):
     now = int(time.time())
     assert abs(now - timestamp) < 5

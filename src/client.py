@@ -9,7 +9,7 @@ from .utils import Connection
 @click.argument("address")
 @click.argument("user_id")
 @click.argument("thought")
-def upload_thought(address, user_id, thought):
+def upload_thought(address: str, user_id: str, thought: str):
     """
     Upload some thought of some user to the server.
 
