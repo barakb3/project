@@ -28,6 +28,15 @@ def test_upload_thought():
     assert b"missing argument" in stderr.lower()
 
 
+def test_reader():
+    process = subprocess.Popen(
+        ["python", "-m", "project", "read"],
+        stderr=subprocess.PIPE,
+    )
+    _, stderr = process.communicate()
+    assert b"missing argument" in stderr.lower()
+
+
 # @contextlib.contextmanager
 # def _argv(*args):
 #     command = lambda: None
