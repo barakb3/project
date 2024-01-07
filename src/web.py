@@ -64,87 +64,87 @@ def run_webserver(address: str, data_dir: str):
 
     """
     @website.route("/")
-    def index():
+    def index() -> str:
         users = get_users(data_dir=data_dir)
         index_html = _INDEX_HTML.format(users="\n".join(users))
         return index_html
 
     @website.route("/users/1")
-    def user1():
+    def user1() -> str:
         user_dir_path = Path(data_dir) / "1"
         thoughts = []
         for thought_file in user_dir_path.iterdir():
             thoughts.append(_THOUGHT_LINE_HTML
                             .format(
-                                    time_stamp=thought_file.name[0:10] + " "
-                                    + thought_file.name[11:13] + ":"
-                                    + thought_file.name[14:16] + ":"
-                                    + thought_file.name[17:19],
-                                    thought=thought_file.read_text())
+                                time_stamp=thought_file.name[0:10] + " " /
+                                + thought_file.name[11:13] + ":" /
+                                + thought_file.name[14:16] + ":" /
+                                + thought_file.name[17:19],
+                                thought=thought_file.read_text())
                             )
         user_html = _USER_HTML.format(id="1", thoughts="\n".join(thoughts))
         return user_html
 
     @website.route("/users/2")
-    def user2():
+    def user2() -> str:
         user_dir_path = Path(data_dir) / "2"
         thoughts = []
         for thought_file in user_dir_path.iterdir():
             thoughts.append(_THOUGHT_LINE_HTML
                             .format(
-                                    time_stamp=thought_file.name[0:10] + " "
-                                    + thought_file.name[11:13] + ":"
-                                    + thought_file.name[14:16] + ":"
-                                    + thought_file.name[17:19],
-                                    thought=thought_file.read_text())
+                                time_stamp=thought_file.name[0:10] + " " /
+                                + thought_file.name[11:13] + ":" /
+                                + thought_file.name[14:16] + ":" /
+                                + thought_file.name[17:19],
+                                thought=thought_file.read_text())
                             )
         user_html = _USER_HTML.format(id="2", thoughts="\n".join(thoughts))
         return user_html
 
     @website.route("/users/3")
-    def user3():
+    def user3() -> str:
         user_dir_path = Path(data_dir) / "3"
         thoughts = []
         for thought_file in user_dir_path.iterdir():
             thoughts.append(_THOUGHT_LINE_HTML
                             .format(
-                                    time_stamp=thought_file.name[0:10] + " "
-                                    + thought_file.name[11:13] + ":"
-                                    + thought_file.name[14:16] + ":"
-                                    + thought_file.name[17:19],
-                                    thought=thought_file.read_text())
+                                time_stamp=thought_file.name[0:10] + " " /
+                                + thought_file.name[11:13] + ":" /
+                                + thought_file.name[14:16] + ":" /
+                                + thought_file.name[17:19],
+                                thought=thought_file.read_text())
                             )
         user_html = _USER_HTML.format(id="3", thoughts="\n".join(thoughts))
         return user_html
 
     @website.route("/users/4")
-    def user4():
+    def user4() -> str:
         user_dir_path = Path(data_dir) / "4"
         thoughts = []
         for thought_file in user_dir_path.iterdir():
             thoughts.append(_THOUGHT_LINE_HTML
                             .format(
-                                    time_stamp=thought_file.name[0:10] + " "
-                                    + thought_file.name[11:13] + ":"
-                                    + thought_file.name[14:16] + ":"
-                                    + thought_file.name[17:19],
-                                    thought=thought_file.read_text())
+                                time_stamp=thought_file.name[0:10] + " " /
+                                + thought_file.name[11:13] + ":" /
+                                + thought_file.name[14:16] + ":" /
+                                + thought_file.name[17:19],
+                                thought=thought_file.read_text())
                             )
         user_html = _USER_HTML.format(id="4", thoughts="\n".join(thoughts))
         return user_html
 
     @website.route("/users/5")
-    def user5():
+    def user5() -> str:
         user_dir_path = Path(data_dir) / "5"
         thoughts = []
         for thought_file in user_dir_path.iterdir():
             thoughts.append(_THOUGHT_LINE_HTML
                             .format(
-                                    time_stamp=thought_file.name[0:10] + " "
-                                    + thought_file.name[11:13] + ":"
-                                    + thought_file.name[14:16] + ":"
-                                    + thought_file.name[17:19],
-                                    thought=thought_file.read_text())
+                                time_stamp=thought_file.name[0:10] + " " /
+                                + thought_file.name[11:13] + ":" /
+                                + thought_file.name[14:16] + ":" /
+                                + thought_file.name[17:19],
+                                thought=thought_file.read_text())
                             )
         user_html = _USER_HTML.format(id="5", thoughts="\n".join(thoughts))
         return user_html

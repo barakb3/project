@@ -1,4 +1,5 @@
 import socket
+import traceback
 
 from .connection import Connection
 
@@ -40,5 +41,10 @@ class Listener:
         self.start()
         return self
 
-    def __exit__(self, exception, error, traceback):
+    def __exit__(
+            self,
+            exception: Exception,
+            error: TypeError,
+            traceback: traceback.TracebackException,
+    ):
         self.stop()

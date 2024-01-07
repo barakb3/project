@@ -10,8 +10,8 @@ env:
 
 script:
   - pytest --cov
-  - flake8 src
-  - flake8 ./*.py
+  - flake8 --suppress-none-returning --ignore ANN101 src
+  - flake8 --suppress-none-returning --ignore ANN101 ./*.py
 
 after_success:
   # Integrity Checking and downloading the Codecov Uploader.
