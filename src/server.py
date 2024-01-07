@@ -1,7 +1,8 @@
-import click
-from pathlib import Path
 import signal
 import threading
+from pathlib import Path
+
+import click
 
 from src.thought import Thought
 from src.utils import Connection, Listener

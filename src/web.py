@@ -1,6 +1,8 @@
-import click
-from flask import Flask
 from pathlib import Path
+
+import click
+
+import flask
 
 
 _INDEX_HTML = '''
@@ -36,7 +38,7 @@ _THOUGHT_LINE_HTML = '''
 '''
 
 
-website = Flask(__name__)
+website = flask.Flask(__name__)
 
 
 def get_users(data_dir: str) -> list:

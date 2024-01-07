@@ -1,7 +1,8 @@
 import datetime as dt
+
 import click
 
-from . import Thought
+from .thought import Thought
 from .utils import Connection
 
 

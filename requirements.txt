@@ -11,6 +11,7 @@ exceptiongroup==1.2.0
 executing==2.0.1
 flake8==6.1.0
 flake8-annotations==3.0.1
+flake8-import-order==0.18.2
 Flask==3.0.0
 idna==3.6
 importlib-metadata==7.0.1
