@@ -1,5 +1,6 @@
 import socket
 import time
+import traceback
 
 
 class Connection:
@@ -37,7 +38,12 @@ class Connection:
     def __enter__(self) -> "Connection":
         return self
 
-    def __exit__(self, exception, error, traceback):
+    def __exit__(
+            self,
+            exception: Exception,
+            error: TypeError,
+            traceback: traceback.TracebackException,
+    ):
         self.close()
 
     def connect(host: str, port: int) -> "Connection":
