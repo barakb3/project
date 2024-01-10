@@ -9,9 +9,7 @@ env:
   - PYTHONPATH="${PYTHONPATH}:./:../"
 
 script:
-  - pytest --cov
-  - flake8 --suppress-none-returning --ignore ANN101 src
-  - flake8 --suppress-none-returning --ignore ANN101 ./*.py
+  - python scripts/run_ci_checks.py --platform=travis
 
 after_success:
   # Integrity Checking and downloading the Codecov Uploader.
