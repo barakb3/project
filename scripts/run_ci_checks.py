@@ -18,6 +18,7 @@ def run_checks(platform: str):
         print("Platform must be either 'local' ot 'travis'.")
         exit(code=1)
     flake8_cmd.append("./")
+    subprocess.run(flake8_cmd)
 
 
 if __name__ == "__main__":

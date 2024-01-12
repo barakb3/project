@@ -55,12 +55,12 @@ class Handler(threading.Thread):
                 f.write(f"\n{self.thought.thought}")
 
     # @parser("translation")
-    def parse_translation(context, snapshot): # noqa ANN001
+    def parse_translation(context, snapshot):  # noqa: ANN001
         # TODO: implement this class as part of exercise 6.
         pass
 
     # @parser("color_image")
-    def parse_color_image(context, snapshot): # noqa ANN001
+    def parse_color_image(context, snapshot):  # noqa: ANN001
         # TODO: implement this class as part of exercise 6.
         pass
 
