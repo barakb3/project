@@ -13,7 +13,7 @@ _DATA_DIR_PATH = pathlib.Path(__file__).absolute().parent / "tests" / "data"
 
 
 @pytest.fixture
-def server_process():
+def server_process() -> subprocess.Popen:
     host, port = _SERVER_ADDRESS
     process = subprocess.Popen(
         [

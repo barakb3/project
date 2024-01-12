@@ -13,8 +13,10 @@ _REUSEADDR = True
 
 
 @pytest.fixture
-def listener():
-    return Listener(port=_PORT, host=_HOST, backlog=_BACKLOG, reuseaddr=_REUSEADDR)
+def listener() -> Listener:
+    return Listener(
+        port=_PORT, host=_HOST, backlog=_BACKLOG, reuseaddr=_REUSEADDR
+    )
 
 
 def test_context_manager(listener: Listener):

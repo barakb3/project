@@ -43,7 +43,11 @@ def test_eq(t: Thought):
     assert t1 == t
     t2 = Thought(user_id=user_id + 1, timestamp=datetime, thought=thought)
     assert t2 != t
-    t3 = Thought(user_id=user_id, timestamp=datetime + dt.timedelta(minutes=1), thought=thought)
+    t3 = Thought(
+        user_id=user_id,
+        timestamp=datetime + dt.timedelta(minutes=1),
+        thought=thought
+    )
     assert t3 != t
     t4 = Thought(user_id=user_id, timestamp=datetime, thought=thought + "!")
     assert t4 != t
