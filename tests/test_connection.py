@@ -32,5 +32,7 @@ def test_context_manager(server: socket.socket):
 
 
 def test_connect(server: socket.socket):
-    with Connection.connect(host="127.0.0.1", port=_PORT) as connection: # noqa F841
+    with Connection.connect(
+        host="127.0.0.1", port=_PORT
+    ) as connection:  # noqa: F841
         server.accept()
