@@ -2,13 +2,14 @@ import struct
 
 import pytest
 
-from src.utils.reader import (
+from src.protocol import (
     CONSTANT_NUM_OF_BYTES_IN_SNAPSHOT,
     NUM_BYTES_PIXEL_COLOR_IMAGE,
     NUM_BYTES_PIXEL_DEPTH_IMAGE,
-    Reader,
     Snapshot,
 )
+from src.utils.reader import Reader
+
 
 ID = 3
 NAME = "Barak Basson"
