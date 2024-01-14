@@ -52,7 +52,6 @@ class Reader:
             data=self.file.read(name_length),
             data_type="string",
             endianness="<",
-            num_bytes=name_length,
         )
         self.birth_day: int = from_bytes(
             data=self.file.read(UINT32_SIZE_IN_BYTES),
