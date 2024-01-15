@@ -1,5 +1,5 @@
+import datetime as dt
 import io
-import os
 import struct
 from typing import Optional, Union
 
@@ -37,18 +37,30 @@ class Config:
 class Snapshot:
     # TODO: Document this class.
     def __init__(
-            self,
-            timestamp: int,
-            color_image_width: int,
-            color_image_height: int,
-            depth_image_width: int,
-            depth_image_height: int,
+        self,
+        timestamp: int,
+        translation: tuple = (0.0, 0.0, 0.0),
+        rotation: tuple = (0.0, 0.0, 0.0, 0.0),
+        color_image_width: int = 0,
+        color_image_height: int = 0,
+        color_image: tuple = (),
+        depth_image_width: int = 0,
+        depth_image_height: int = 0,
+        depth_image: tuple = (),
+        feelings: tuple = (0.0, 0.0, 0.0, 0.0),
     ):
-        self.timestamp = timestamp
+        self.timestamp = dt.datetime.fromtimestamp(
+            timestamp, tz=dt.timezone.utc
+        )
+        self.translation = translation
+        self.rotation = rotation
         self.color_image_width = color_image_width
         self.color_image_height = color_image_height
+        self.color_image = color_image
         self.depth_image_width = depth_image_width
         self.depth_image_height = depth_image_height
+        self.depth_image = depth_image
+        self.feelings = feelings
 
     def __len__(self) -> int:
         """
@@ -58,61 +70,48 @@ class Snapshot:
             (NUM_BYTES_PIXEL_COLOR_IMAGE * self.color_image_width * self.color_image_height) + \
             (NUM_BYTES_PIXEL_DEPTH_IMAGE * self.depth_image_width * self.depth_image_height) # noqa E501
 
-    def read_from_file(file: io.BufferedReader) -> Optional["Snapshot"]:
+    def read_from_file(file: io.BufferedReader) -> Optional[bytes]:
         binary_timestamp = file.read(NUM_BYTES_TIMESTAMP)
         if binary_timestamp == b"":
             # EOF reached.
             return None
+        snapshot_blob = bytearray(binary_timestamp)
 
-        timestamp = from_bytes(
-            data=binary_timestamp,
-            data_type="uint64",
-            endianness="<",
-        )
+        snapshot_blob += file.read(NUM_BYTES_TRANSLATION + NUM_BYTES_ROTATION)
 
-        # Jump to color image dimensions.
-        file.seek(NUM_BYTES_TRANSLATION + NUM_BYTES_ROTATION, os.SEEK_CUR)
-
-        color_image_height = from_bytes(
-            data=file.read(NUM_BYTES_DIMENSION),
-            data_type="uint32",
-            endianness="<",
-        )
+        binary_color_image_height = file.read(NUM_BYTES_DIMENSION)
+        binary_color_image_width = file.read(NUM_BYTES_DIMENSION)
+        snapshot_blob += binary_color_image_width
+        snapshot_blob += binary_color_image_height
         color_image_width = from_bytes(
-            data=file.read(NUM_BYTES_DIMENSION),
-            data_type="uint32",
-            endianness="<",
+            data=binary_color_image_width, data_type="uint32", endianness="<"
+        )
+        color_image_height = from_bytes(
+            data=binary_color_image_height, data_type="uint32", endianness="<"
+        )
+        snapshot_blob += from_bgr_to_rgb(
+            bgr=file.read(
+                NUM_BYTES_PIXEL_COLOR_IMAGE * color_image_width * color_image_height # noqa E501
+            )
         )
 
-        # Jump to depth image dimensions.
-        file.seek(
-            NUM_BYTES_PIXEL_COLOR_IMAGE * color_image_width * color_image_height, # noqa E501
-            os.SEEK_CUR,
-        )
+        binary_depth_image_height = file.read(NUM_BYTES_DIMENSION)
+        binary_depth_image_width = file.read(NUM_BYTES_DIMENSION)
+        snapshot_blob += binary_depth_image_width
+        snapshot_blob += binary_depth_image_height
         depth_image_height = from_bytes(
-            data=file.read(NUM_BYTES_DIMENSION),
-            data_type="uint32",
-            endianness="<",
+            data=binary_depth_image_height, data_type="uint32", endianness="<"
         )
         depth_image_width = from_bytes(
-            data=file.read(NUM_BYTES_DIMENSION),
-            data_type="uint32",
-            endianness="<",
+            data=binary_depth_image_width, data_type="uint32", endianness="<"
+        )
+        snapshot_blob += file.read(
+            NUM_BYTES_PIXEL_DEPTH_IMAGE * depth_image_width * depth_image_height # noqa E501
         )
 
-        # Jump to the end of the snapshot.
-        file.seek(
-            NUM_BYTES_PIXEL_DEPTH_IMAGE * depth_image_width * depth_image_height + NUM_BYTES_FEELINGS, # noqa E501
-            os.SEEK_CUR,
-        )
+        snapshot_blob += file.read(NUM_BYTES_FEELINGS)
 
-        return Snapshot(
-            timestamp=timestamp,
-            color_image_width=color_image_width,
-            color_image_height=color_image_height,
-            depth_image_width=depth_image_width,
-            depth_image_height=depth_image_height,
-        )
+        return bytes(snapshot_blob)
 
 
 def from_bytes(
@@ -216,3 +215,11 @@ def to_bytes(value: Union[int, float, str],
         packed_value = struct.pack(f"{endianness}{code}", value)
 
     return packed_value
+
+
+def from_bgr_to_rgb(bgr: bytes) -> bytes:
+    rgb = bytearray()
+    for i in range(0, len(bgr), NUM_BYTES_PIXEL_COLOR_IMAGE):
+        pixel = bgr[i:i + 3]
+        rgb.extend(reversed(pixel))
+    return rgb

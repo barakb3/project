@@ -107,14 +107,10 @@ def test_metadata(reader: Reader):
     assert reader.gender == GENDER
 
 
-def test_snapshot_as_a_generator(reader: Reader):
+def test_reader_as_snapshot_generator(reader: Reader):
     reader_iterator = iter(reader)
-    snapahot: Snapshot = next(reader_iterator)
-    assert snapahot.timestamp == TIMESTAMP_SNAPSHOT
-    assert snapahot.color_image_width == COLOR_IMAGE_WIDTH_SNAPSHOT
-    assert snapahot.color_image_height == COLOR_IMAGE_HEIGHT_SNAPSHOT
-    assert snapahot.depth_image_width == DEPTH_IMAGE_WIDTH_SNAPSHOT
-    assert snapahot.depth_image_height == DEPTH_IMAGE_HEIGHT_SNAPSHOT
+    snapshot = next(reader_iterator)
+    assert isinstance(snapshot, bytes)
 
 
 def test_snapshot_length(snapshot: Snapshot):
