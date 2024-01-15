@@ -72,4 +72,4 @@ def read(path: str):
     reader = Reader(path)
     i = 0
     for i, snapshot in enumerate(reader):
-        print(f"{snapshot.timestamp=}, snapshot number: {i+1}")
+        print(f"snapshot number: {i+1}")
