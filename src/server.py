@@ -8,6 +8,11 @@ from src.thought import Thought
 from src.utils import Connection, Listener
 
 
+class Parser:
+    # TODO: implement this class as part of exercise 6.
+    pass
+
+
 class Handler(threading.Thread):
     def __init__(
             self,
@@ -54,16 +59,6 @@ class Handler(threading.Thread):
             else:
                 f.write(f"\n{self.thought.thought}")
 
-    # @parser("translation")
-    def parse_translation(context, snapshot):  # noqa: ANN001
-        # TODO: implement this class as part of exercise 6.
-        pass
-
-    # @parser("color_image")
-    def parse_color_image(context, snapshot):  # noqa: ANN001
-        # TODO: implement this class as part of exercise 6.
-        pass
-
 
 @click.command()
 @click.argument("address")
@@ -83,6 +78,17 @@ def run_server(address: str, data_dir: str):
     signal.SIGINT
     with Listener(port=int(port), host=ip) as listener:
         lock = threading.Lock()
+
+        # @parser("translation")
+        def parse_translation(context, snapshot):  # noqa: ANN001
+            # TODO: implement this class as part of exercise 6.
+            pass
+
+        # @parser("color_image")
+        def parse_color_image(context, snapshot):  # noqa: ANN001
+            # TODO: implement this class as part of exercise 6.
+            pass
+
         while True:
             client = listener.accept()
             newthread = Handler(client=client, data_dir=data_dir, lock=lock)
