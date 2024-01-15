@@ -29,11 +29,6 @@ class Connection:
             chunk = size_prefixed_msg[i:i + CHUNK_SIZE_IN_BYTES]
             self.conn.sendall(chunk)
 
-    def receive(self, size: int) -> bytes:
-        msg = self.conn.recv(size)
-        print(msg)
-        return msg
-
     def receive_message(self) -> bytes:
         msg_length = from_bytes(
             data=self.conn.recv(UINT32_SIZE_IN_BYTES),
