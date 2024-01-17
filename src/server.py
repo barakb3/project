@@ -26,7 +26,6 @@ from .protocol import (
     Snapshot,
     from_bytes,
 )
-from .thought import Thought
 from .utils import Connection, Listener
 
 
@@ -57,20 +56,8 @@ class Handler(threading.Thread):
         self.client = client
         self.data_dir_path = Path(data_dir)
         self.lock = lock
-        self.msg: bytearray = None
-        self.thought: Thought = None
         self.parser = parser
         self.thread_number = thread_number
-
-    def deprecated_run(self):
-        msg = self.read_message()
-        if len(msg) < 20:
-            raise Exception("Incomplete meta data received.")
-        self.thought = Thought.deserialize(data=msg)
-        self.lock.acquire()
-        self.write_thought()
-        self.lock.release()
-        self.client.close()
 
     def run(self):
         hello_msg = self.client.receive_message()
@@ -91,16 +78,6 @@ class Handler(threading.Thread):
 
         self.client.close()
         print(f"Server processed {self.thread_number} snapshots.")
-
-    def read_message(self) -> bytearray:
-        msg = bytearray(self.client.receive(1024))
-        while (cont_msg := self.client.receive(1024)):
-            msg += cont_msg
-        return msg
-
-    def validate_message(self):
-        if len(self.msg) < 20:
-            raise Exception("Incomplete meta data received.")
 
     def process_snapshot(self, snapshot_msg: bytes, user_id: int):
         msg_index = 0
@@ -186,18 +163,6 @@ class Handler(threading.Thread):
         assert (
             msg_index == len(snapshot_msg)
         ), "Message length received doesn't match."
-
-    def write_thought(self):
-        dir_path = self.data_dir_path / f"{self.thought.user_id}"
-        dir_path.mkdir(parents=True, exist_ok=True)
-        file_path = \
-            dir_path / f"{self.thought.timestamp:%Y-%m-%d_%H-%M-%S}.txt"
-        file_path.touch()
-        with file_path.open(mode="r+") as f:
-            if f.read() == "":
-                f.write(f"{self.thought.thought}")
-            else:
-                f.write(f"\n{self.thought.thought}")
 
 
 @click.command()
