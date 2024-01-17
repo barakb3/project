@@ -2,37 +2,36 @@ import struct
 
 import pytest
 
-from src.protocol import (
-    CONSTANT_NUM_OF_BYTES_IN_SNAPSHOT,
-    NUM_BYTES_PIXEL_COLOR_IMAGE,
-    NUM_BYTES_PIXEL_DEPTH_IMAGE,
-    Snapshot,
-)
 from src.utils.reader import Reader
+
+from .test_utils import (  # noqa: I101
+    BINARY_TIMESTAMP_1,
+    BINARY_TRANSLATION_1,
+    BINARY_ROTATION_1,
+    BINARY_COLOR_IMAGE_HEIGHT_1,
+    BINARY_COLOR_IMAGE_WIDTH_1,
+    BINARY_COLOR_IMAGE_1,
+    BINARY_DEPTH_IMAGE_HEIGHT_1,
+    BINARY_DEPTH_IMAGE_WIDTH_1,
+    BINARY_DEPTH_IMAGE_1,
+    BINARY_FEELINGS_1,
+    BINARY_TIMESTAMP_2,
+    BINARY_TRANSLATION_2,
+    BINARY_ROTATION_2,
+    BINARY_COLOR_IMAGE_HEIGHT_2,
+    BINARY_COLOR_IMAGE_WIDTH_2,
+    BINARY_COLOR_IMAGE_2,
+    BINARY_DEPTH_IMAGE_HEIGHT_2,
+    BINARY_DEPTH_IMAGE_WIDTH_2,
+    BINARY_DEPTH_IMAGE_2,
+    BINARY_FEELINGS_2
+)
 
 
 ID = 3
 NAME = "Barak Basson"
 BIRTHDAY = 699746400
 GENDER = "m"
-
-# Snapshot 1.
-TIMESTAMP_SNAPSHOT = 1
-TRANSLATION_X_SNAPSHOT = 1.1
-TRANSLATION_Y_SNAPSHOT = 1.2
-TRANSLATION_Z_SNAPSHOT = 1.3
-ROTATION_X_SNAPSHOT = 1.11
-ROTATION_Y_SNAPSHOT = 1.22
-ROTATION_Z_SNAPSHOT = 1.33
-ROTATION_W_SNAPSHOT = 1.44
-COLOR_IMAGE_HEIGHT_SNAPSHOT = 1
-COLOR_IMAGE_WIDTH_SNAPSHOT = 1
-DEPTH_IMAGE_HEIGHT_SNAPSHOT = 1
-DEPTH_IMAGE_WIDTH_SNAPSHOT = 1
-HUNGER_SNAPSHOT = 1.111
-THIRST_SNAPSHOT = 1.222
-EXAUSTION_SNAPSHOT = 1.333
-HAPPINESS_SNAPSHOT = 1.444
 
 
 @pytest.fixture
@@ -49,41 +48,26 @@ def metadata() -> bytes:
 
 @pytest.fixture
 def snapshot_list() -> bytes:
-    return struct.pack(
-        "<QdddddddII{}BII{}fffff".format(
-            NUM_BYTES_PIXEL_COLOR_IMAGE * COLOR_IMAGE_HEIGHT_SNAPSHOT * COLOR_IMAGE_WIDTH_SNAPSHOT, # noqa E501
-            NUM_BYTES_PIXEL_DEPTH_IMAGE * DEPTH_IMAGE_HEIGHT_SNAPSHOT * DEPTH_IMAGE_WIDTH_SNAPSHOT, # noqa E501
-        ),
-        TIMESTAMP_SNAPSHOT,
-        TRANSLATION_X_SNAPSHOT,
-        TRANSLATION_Y_SNAPSHOT,
-        TRANSLATION_Z_SNAPSHOT,
-        ROTATION_X_SNAPSHOT,
-        ROTATION_Y_SNAPSHOT,
-        ROTATION_Z_SNAPSHOT,
-        ROTATION_W_SNAPSHOT,
-        COLOR_IMAGE_HEIGHT_SNAPSHOT,
-        COLOR_IMAGE_WIDTH_SNAPSHOT,
-        *[i for i in range(NUM_BYTES_PIXEL_COLOR_IMAGE * COLOR_IMAGE_HEIGHT_SNAPSHOT * COLOR_IMAGE_WIDTH_SNAPSHOT)], # noqa E501
-        DEPTH_IMAGE_HEIGHT_SNAPSHOT,
-        DEPTH_IMAGE_WIDTH_SNAPSHOT,
-        *[float(i) for i in range(NUM_BYTES_PIXEL_DEPTH_IMAGE * DEPTH_IMAGE_HEIGHT_SNAPSHOT * DEPTH_IMAGE_WIDTH_SNAPSHOT)], # noqa E501
-        HUNGER_SNAPSHOT,
-        THIRST_SNAPSHOT,
-        EXAUSTION_SNAPSHOT,
-        HAPPINESS_SNAPSHOT,
-    )
-
-
-@pytest.fixture
-def snapshot() -> Snapshot:
-    return Snapshot(
-        timestamp=TIMESTAMP_SNAPSHOT,
-        color_image_width=COLOR_IMAGE_WIDTH_SNAPSHOT,
-        color_image_height=COLOR_IMAGE_HEIGHT_SNAPSHOT,
-        depth_image_width=DEPTH_IMAGE_WIDTH_SNAPSHOT,
-        depth_image_height=DEPTH_IMAGE_HEIGHT_SNAPSHOT
-    )
+    return BINARY_TIMESTAMP_1 + \
+        BINARY_TRANSLATION_1 + \
+        BINARY_ROTATION_1 + \
+        BINARY_COLOR_IMAGE_HEIGHT_1 + \
+        BINARY_COLOR_IMAGE_WIDTH_1 + \
+        BINARY_COLOR_IMAGE_1 + \
+        BINARY_DEPTH_IMAGE_HEIGHT_1 + \
+        BINARY_DEPTH_IMAGE_WIDTH_1 + \
+        BINARY_DEPTH_IMAGE_1 + \
+        BINARY_FEELINGS_1 + \
+        BINARY_TIMESTAMP_2 + \
+        BINARY_TRANSLATION_2 + \
+        BINARY_ROTATION_2 + \
+        BINARY_COLOR_IMAGE_HEIGHT_2 + \
+        BINARY_COLOR_IMAGE_WIDTH_2 + \
+        BINARY_COLOR_IMAGE_2 + \
+        BINARY_DEPTH_IMAGE_HEIGHT_2 + \
+        BINARY_DEPTH_IMAGE_WIDTH_2 + \
+        BINARY_DEPTH_IMAGE_2 + \
+        BINARY_FEELINGS_2
 
 
 @pytest.fixture
@@ -111,9 +95,7 @@ def test_reader_as_snapshot_generator(reader: Reader):
     reader_iterator = iter(reader)
     snapshot = next(reader_iterator)
     assert isinstance(snapshot, bytes)
-
-
-def test_snapshot_length(snapshot: Snapshot):
-    assert len(snapshot) == CONSTANT_NUM_OF_BYTES_IN_SNAPSHOT + \
-            (NUM_BYTES_PIXEL_COLOR_IMAGE * COLOR_IMAGE_WIDTH_SNAPSHOT * COLOR_IMAGE_HEIGHT_SNAPSHOT) + \
-            (NUM_BYTES_PIXEL_DEPTH_IMAGE * DEPTH_IMAGE_WIDTH_SNAPSHOT * DEPTH_IMAGE_HEIGHT_SNAPSHOT) # noqa E501
+    snapshot = next(reader_iterator)
+    assert isinstance(snapshot, bytes)
+    with pytest.raises(StopIteration):
+        next(reader_iterator)
