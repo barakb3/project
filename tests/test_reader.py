@@ -72,7 +72,9 @@ def snapshot_list() -> bytes:
 
 
 @pytest.fixture
-def sample_path(tmp_path, metadata: bytes, snapshot_list: bytes) -> str: # noqa ANN001
+def sample_path(
+    tmp_path, metadata: bytes, snapshot_list: bytes  # noqa: ANN001
+) -> str:
     sample_path = tmp_path / "sample.mind"
     with sample_path.open(mode="wb") as file:
         file.write(metadata)
