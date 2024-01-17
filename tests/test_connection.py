@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from src.utils.connection import Connection
+from src.utils import Connection
 
 
 _PORT = 5000

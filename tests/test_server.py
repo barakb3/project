@@ -20,6 +20,7 @@ def server_process() -> subprocess.Popen:
             "python",
             "-m",
             "project",
+            "server",
             "run-server",
             f"{host}:{port}",
             _DATA_DIR_PATH,

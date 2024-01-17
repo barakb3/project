@@ -2,7 +2,7 @@ import datetime as dt
 
 import pytest
 
-from src import Thought
+from src.thought import Thought
 
 
 user_id = 1

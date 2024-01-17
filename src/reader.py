@@ -2,12 +2,12 @@ import io
 
 import click
 
-from ..constants import (
+from src.constants import (
     CHAR_SIZE_IN_BYTES,
     UINT32_SIZE_IN_BYTES,
     UINT64_SIZE_IN_BYTES,
 )
-from ..protocol import Snapshot, from_bytes
+from src.protocol import Snapshot, from_bytes
 
 
 class Reader:
