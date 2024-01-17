@@ -1,6 +1,6 @@
 import pytest
 
-from src.protocol import Hello
+from src.protocol import Config, Hello
 
 
 USER_ID = 1
@@ -11,6 +11,8 @@ SERIALIZED = (
     b'\x01\x00\x00\x00\x00\x00\x00\x00\x06\x00\x00\x00BarakB\x03\x00\x00\x00m'
 )
 
+SUPPORTED_FIELDS = ["timestamp", "color_image"]
+
 
 @pytest.fixture
 def hello() -> Hello:
@@ -19,5 +21,14 @@ def hello() -> Hello:
     )
 
 
-def test_hello_serialize_deserialize(hello: Hello):
+@pytest.fixture
+def config() -> Config:
+    return Config(supported_fields=SUPPORTED_FIELDS)
+
+
+def test_hello_serde(hello: Hello):
     assert hello == Hello.deserialize(hello.serialize())
+
+
+def test_config_serde(config: Config):
+    assert config == Config.deserialize(config.serialize())

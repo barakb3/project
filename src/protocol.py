@@ -114,8 +114,65 @@ class Hello:
 
 
 class Config:
-    # TODO: implement this class as part of exercise 6.
-    pass
+    """
+    A class representing the second message in the protocol, a config message.
+    """
+    def __init__(self, supported_fields: tuple):
+        self.supported_fields = supported_fields
+
+    def __eq__(self, other: "Config") -> bool:
+        if not isinstance(other, Config):
+            return NotImplemented
+        return self.supported_fields == other.supported_fields
+
+    def serialize(self) -> bytes:
+        serialized = to_bytes(
+            value=len(self.supported_fields),
+            data_type="uint32",
+            endianness="<",
+        )
+        for field in self.supported_fields:
+            serialized += to_bytes(
+                value=len(field), data_type="uint32", endianness="<"
+            )
+            serialized += to_bytes(
+                value=field, data_type="string", endianness="<"
+            )
+        return serialized
+
+    def deserialize(msg: bytes) -> "Config":
+        data_index = 0
+
+        num_supported_fields = from_bytes(
+            data=msg[data_index:data_index + UINT32_SIZE_IN_BYTES],
+            data_type="uint32",
+            endianness="<",
+        )
+        data_index += UINT32_SIZE_IN_BYTES
+
+        supported_fields = []
+        for _ in range(num_supported_fields):
+            field_len = from_bytes(
+                data=msg[data_index:data_index + UINT32_SIZE_IN_BYTES],
+                data_type="uint32",
+                endianness="<",
+            )
+            data_index += UINT32_SIZE_IN_BYTES
+
+            supported_fields.append(
+                from_bytes(
+                    data=msg[data_index:data_index + field_len],
+                    data_type="string",
+                    endianness="<",
+                )
+            )
+            data_index += field_len
+
+        assert (
+            data_index == len(msg)
+        ), "Message length received doesn't match."
+
+        return Config(supported_fields=supported_fields)
 
 
 class Snapshot:
