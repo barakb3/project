@@ -3,7 +3,7 @@ import subprocess
 
 
 def run_checks(platform: str):
-    subprocess.run(["pytest", "--cov"])
+    subprocess.run(["pytest", "--cov"], check=True)
     flake8_cmd = [
         "flake8",
         "--suppress-none-returning",
@@ -18,7 +18,7 @@ def run_checks(platform: str):
         print("Platform must be either 'local' ot 'travis'.")
         exit(code=1)
     flake8_cmd.append("./")
-    subprocess.run(flake8_cmd)
+    subprocess.run(flake8_cmd, check=True)
 
 
 if __name__ == "__main__":
