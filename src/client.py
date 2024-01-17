@@ -2,8 +2,8 @@ import datetime as dt
 
 import click
 
-from .thought import Thought
-from .utils import Connection
+from src.thought import Thought
+from src.utils import Connection
 
 
 @click.command()

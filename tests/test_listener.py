@@ -3,7 +3,7 @@ import time
 
 import pytest
 
-from src.utils.listener import Listener
+from src.utils import Listener
 
 
 _PORT = 1234

@@ -2,9 +2,9 @@ import struct
 
 import pytest
 
-from src.utils.reader import Reader
+from src.reader import Reader
 
-from .test_utils import (  # noqa: I101
+from tests.test_utils import (  # noqa: I101
     BINARY_TIMESTAMP_1,
     BINARY_TRANSLATION_1,
     BINARY_ROTATION_1,
