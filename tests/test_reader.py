@@ -2,6 +2,7 @@ import struct
 
 import pytest
 
+from src.protocol import Snapshot
 from src.reader import Reader
 
 from tests.test_utils import (  # noqa: I101
@@ -94,8 +95,8 @@ def test_metadata(reader: Reader):
 def test_reader_as_snapshot_generator(reader: Reader):
     reader_iterator = iter(reader)
     snapshot = next(reader_iterator)
-    assert isinstance(snapshot, bytes)
+    assert isinstance(snapshot, Snapshot)
     snapshot = next(reader_iterator)
-    assert isinstance(snapshot, bytes)
+    assert isinstance(snapshot, Snapshot)
     with pytest.raises(StopIteration):
         next(reader_iterator)
