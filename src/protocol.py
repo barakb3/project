@@ -4,6 +4,7 @@ import struct
 from typing import Optional, Union
 
 from src.constants import (
+    CHAR_SIZE_IN_BYTES,
     DOUBLE_SIZE_IN_BYTES,
     FLOAT_SIZE_IN_BYTES,
     UINT32_SIZE_IN_BYTES,
@@ -25,8 +26,91 @@ CONSTANT_NUM_OF_BYTES_IN_SNAPSHOT = NUM_BYTES_TIMESTAMP + \
 
 
 class Hello:
-    # TODO: implement this class as part of exercise 6.
-    pass
+    """
+    A class representing the first message in the protocol, a hello message.
+    """
+    def __init__(
+        self, user_id: int, username: str, birth_day: int, gender: str
+    ):
+        self.user_id = user_id
+        self.username = username
+        self.birth_day = birth_day
+        self.gender = gender
+
+    def __eq__(self, other: "Hello") -> bool:
+        if not isinstance(other, Hello):
+            return NotImplemented
+        return self.user_id == other.user_id and \
+            self.username == other.username and \
+            self.birth_day == other.birth_day and \
+            self.gender == other.gender
+
+    def serialize(self) -> bytes:
+        serialized = to_bytes(
+            value=self.user_id, data_type="uint64", endianness="<"
+        )
+        serialized += to_bytes(
+            value=len(self.username), data_type="uint32", endianness="<"
+        )
+        serialized += to_bytes(
+            value=self.username, data_type="string", endianness="<"
+        )
+        serialized += to_bytes(
+            value=self.birth_day, data_type="uint32", endianness="<"
+        )
+        serialized += to_bytes(
+            value=self.gender, data_type="char", endianness="<"
+        )
+        return serialized
+
+    def deserialize(msg: bytes) -> "Hello":
+        data_index = 0
+
+        user_id = from_bytes(
+            data=msg[data_index:data_index + UINT64_SIZE_IN_BYTES],
+            data_type="uint64",
+            endianness="<",
+        )
+        data_index += UINT64_SIZE_IN_BYTES
+
+        username_length = from_bytes(
+            data=msg[data_index:data_index + UINT32_SIZE_IN_BYTES],
+            data_type="uint32",
+            endianness="<",
+        )
+        data_index += UINT32_SIZE_IN_BYTES
+
+        username = from_bytes(
+            data=msg[data_index:data_index + username_length],
+            data_type="string",
+            endianness="<",
+        )
+        data_index += username_length
+
+        birth_day = from_bytes(
+            data=msg[data_index:data_index + UINT32_SIZE_IN_BYTES],
+            data_type="uint32",
+            endianness="<",
+        )
+        data_index += UINT32_SIZE_IN_BYTES
+
+        gender = from_bytes(
+            data=msg[data_index:data_index + CHAR_SIZE_IN_BYTES],
+            data_type="char",
+            endianness="<"
+        )
+        data_index += CHAR_SIZE_IN_BYTES
+
+        assert (
+            data_index == len(msg)
+        ), "Message length received doesn't match."
+
+        return Hello(
+            user_id=user_id,
+            username=username,
+            birth_day=birth_day,
+            gender=gender,
+        )
 
 
 class Config:
