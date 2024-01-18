@@ -36,6 +36,7 @@ def get_message():  # noqa: ANN201
         process.join()
 
 
+# TODO: Add client tests.
 # def test_connection(get_message):  # noqa: ANN001
 #     host, port = _SERVER_ADDRESS
 #     subprocess.Popen(

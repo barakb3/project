@@ -11,14 +11,12 @@ from src.utils import Connection
 @click.argument("sample_path")
 def run(address: str, sample_path: str):
     """
-    Upload some thought of some user to the server.
+    Upload some snapshots from a file to the server.
 
     :param address: A host and a port, e.g.: 127.0.0.1:5000.
     :type address: str
-    :param user_id: The user Id, e.g. 2
-    :type user_id: str
-    :param thought: The thought the the user had.
-    :type thought: str
+    :param sample_path: A path to the file.
+    :type sample_path: str ot Path-like objects
 
     """
     ip, port = address.split(":", 1)
