@@ -18,9 +18,6 @@ class Connection:
         return ((f"<Connection from {self.ip}:{self.port} "
                  f"to {self.peer_ip}:{self.peer_port}>"))
 
-    def send(self, data: bytes):
-        self.conn.sendall(data)
-
     def send_message(self, msg: bytes):
         size_prefixed_msg = to_bytes(
             value=len(msg), data_type="uint32", endianness="<"

@@ -1,19 +1,15 @@
-import datetime as dt
-
 import click
 
 from src.constants import UINT32_SIZE_IN_BYTES
 from src.protocol import Config, Hello, Snapshot
 from src.reader import Reader
-from src.thought import Thought
 from src.utils import Connection
 
 
 @click.command()
 @click.argument("address")
-@click.argument("user_id")
-@click.argument("thought")
-def upload_thought(address: str, user_id: str, thought: str):
+@click.argument("sample_path")
+def run(address: str, sample_path: str):
     """
     Upload some thought of some user to the server.
 
@@ -25,17 +21,6 @@ def upload_thought(address: str, user_id: str, thought: str):
     :type thought: str
 
     """
-    ip, port = address.split(":", 1)
-    t = Thought(user_id=user_id, timestamp=dt.datetime.now(), thought=thought)
-    with Connection.connect(host=ip, port=int(port)) as connection:
-        connection.send(t.serialize())
-    print("done")
-
-
-@click.command()
-@click.argument("address")
-@click.argument("sample_path")
-def run(address: str, sample_path: str):
     ip, port = address.split(":", 1)
     reader = Reader(path=sample_path)
 

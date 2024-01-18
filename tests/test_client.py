@@ -1,7 +1,7 @@
 import multiprocessing
 import socket
 import struct
-import subprocess
+# import subprocess
 import time
 
 import pytest
@@ -36,125 +36,125 @@ def get_message():  # noqa: ANN201
         process.join()
 
 
-def test_connection(get_message):  # noqa: ANN001
-    host, port = _SERVER_ADDRESS
-    subprocess.Popen(
-        [
-            "python",
-            "-m",
-            "project",
-            "client",
-            "upload-thought",
-            f"{host}:{port}",
-            f"{_USER_1}",
-            _THOUGHT_1,
-        ],
-        stdout=subprocess.PIPE,
-    )
-    message = get_message()
-    assert message
+# def test_connection(get_message):  # noqa: ANN001
+#     host, port = _SERVER_ADDRESS
+#     subprocess.Popen(
+#         [
+#             "python",
+#             "-m",
+#             "project",
+#             "client",
+#             "upload-thought",
+#             f"{host}:{port}",
+#             f"{_USER_1}",
+#             _THOUGHT_1,
+#         ],
+#         stdout=subprocess.PIPE,
+#     )
+#     message = get_message()
+#     assert message
 
 
-def test_user_id(get_message):  # noqa: ANN001
-    host, port = _SERVER_ADDRESS
-    subprocess.Popen(
-        [
-            "python",
-            "-m",
-            "project",
-            "client",
-            "upload-thought",
-            f"{host}:{port}",
-            f"{_USER_1}",
-            _THOUGHT_1,
-        ],
-        stdout=subprocess.PIPE,
-    )
-    user_id, timestamp, thought = get_message()
-    assert user_id == _USER_1
-    subprocess.Popen(
-        [
-            "python",
-            "-m",
-            "project",
-            "client",
-            "upload-thought",
-            f"{host}:{port}",
-            f"{_USER_2}",
-            _THOUGHT_1,
-        ],
-        stdout=subprocess.PIPE,
-    )
-    user_id, timestamp, thought = get_message()
-    assert user_id == _USER_2
+# def test_user_id(get_message):  # noqa: ANN001
+#     host, port = _SERVER_ADDRESS
+#     subprocess.Popen(
+#         [
+#             "python",
+#             "-m",
+#             "project",
+#             "client",
+#             "upload-thought",
+#             f"{host}:{port}",
+#             f"{_USER_1}",
+#             _THOUGHT_1,
+#         ],
+#         stdout=subprocess.PIPE,
+#     )
+#     user_id, timestamp, thought = get_message()
+#     assert user_id == _USER_1
+#     subprocess.Popen(
+#         [
+#             "python",
+#             "-m",
+#             "project",
+#             "client",
+#             "upload-thought",
+#             f"{host}:{port}",
+#             f"{_USER_2}",
+#             _THOUGHT_1,
+#         ],
+#         stdout=subprocess.PIPE,
+#     )
+#     user_id, timestamp, thought = get_message()
+#     assert user_id == _USER_2
 
 
-def test_timestamp(get_message):  # noqa: ANN001
-    host, port = _SERVER_ADDRESS
-    subprocess.Popen(
-        [
-            "python",
-            "-m",
-            "project",
-            "client",
-            "upload-thought",
-            f"{host}:{port}",
-            f"{_USER_1}",
-            _THOUGHT_1,
-        ],
-        stdout=subprocess.PIPE,
-    )
-    user_id, timestamp, thought = get_message()
-    _assert_now(timestamp=timestamp)
-    subprocess.Popen(
-        [
-            "python",
-            "-m",
-            "project",
-            "client",
-            "upload-thought",
-            f"{host}:{port}",
-            f"{_USER_2}",
-            _THOUGHT_2,
-        ],
-        stdout=subprocess.PIPE,
-    )
-    user_id, timestamp, thought = get_message()
-    _assert_now(timestamp=timestamp)
+# def test_timestamp(get_message):  # noqa: ANN001
+#     host, port = _SERVER_ADDRESS
+#     subprocess.Popen(
+#         [
+#             "python",
+#             "-m",
+#             "project",
+#             "client",
+#             "upload-thought",
+#             f"{host}:{port}",
+#             f"{_USER_1}",
+#             _THOUGHT_1,
+#         ],
+#         stdout=subprocess.PIPE,
+#     )
+#     user_id, timestamp, thought = get_message()
+#     _assert_now(timestamp=timestamp)
+#     subprocess.Popen(
+#         [
+#             "python",
+#             "-m",
+#             "project",
+#             "client",
+#             "upload-thought",
+#             f"{host}:{port}",
+#             f"{_USER_2}",
+#             _THOUGHT_2,
+#         ],
+#         stdout=subprocess.PIPE,
+#     )
+#     user_id, timestamp, thought = get_message()
+#     _assert_now(timestamp=timestamp)
 
 
-def test_thought(get_message):  # noqa: ANN001
-    host, port = _SERVER_ADDRESS
-    subprocess.Popen(
-        [
-            "python",
-            "-m",
-            "project",
-            "client",
-            "upload-thought",
-            f"{host}:{port}",
-            f"{_USER_1}",
-            _THOUGHT_1,
-        ],
-        stdout=subprocess.PIPE,
-    )
-    user_id, timestamp, thought = get_message()
-    assert thought == _THOUGHT_1
-    subprocess.Popen(
-        [
-            "python",
-            "-m",
-            "project",
-            "client",
-            "upload-thought",
-            f"{host}:{port}",
-            f"{_USER_1}",
-            _THOUGHT_2,
-        ],
-        stdout=subprocess.PIPE,
-    )
-    user_id, timestamp, thought = get_message()
-    assert thought == _THOUGHT_2
+# def test_thought(get_message):  # noqa: ANN001
+#     host, port = _SERVER_ADDRESS
+#     subprocess.Popen(
+#         [
+#             "python",
+#             "-m",
+#             "project",
+#             "client",
+#             "upload-thought",
+#             f"{host}:{port}",
+#             f"{_USER_1}",
+#             _THOUGHT_1,
+#         ],
+#         stdout=subprocess.PIPE,
+#     )
+#     user_id, timestamp, thought = get_message()
+#     assert thought == _THOUGHT_1
+#     subprocess.Popen(
+#         [
+#             "python",
+#             "-m",
+#             "project",
+#             "client",
+#             "upload-thought",
+#             f"{host}:{port}",
+#             f"{_USER_1}",
+#             _THOUGHT_2,
+#         ],
+#         stdout=subprocess.PIPE,
+#     )
+#     user_id, timestamp, thought = get_message()
+#     assert thought == _THOUGHT_2
 
 
 def _run_server(pipe):  # noqa: ANN001
