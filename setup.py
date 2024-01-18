@@ -10,10 +10,8 @@ setup(
     install_requires=["click", "flask"],
     entry_points={
         "console_scripts": [
-            # "read = :read",
-            "run_server = :run_server",
-            "run_webserver = :run_webserver",
-            "upload_thought = :upload_thought",
+            "client = :client",
+            "server = :server",
         ],
     },
     tests_require=["pytest"],

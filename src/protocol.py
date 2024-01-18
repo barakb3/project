@@ -4,6 +4,7 @@ import struct
 from typing import Optional, Union
 
 from src.constants import (
+    BYTE_SIZE_IN_BYTES,
     CHAR_SIZE_IN_BYTES,
     DOUBLE_SIZE_IN_BYTES,
     FLOAT_SIZE_IN_BYTES,
@@ -43,6 +44,22 @@ class Hello:
         self.username = username
         self.birth_day = birth_day
         self.gender = gender
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}"
+            f"(user_id={self.user_id!r}, "
+            f"username={self.username!r}, "
+            f"birth_day={self.birth_day!r}, "
+            f"gender={self.gender!r})"
+        )
+
+    def __str__(self) -> str:
+        return (
+            f"[{self.user_id=}] "
+            f"{self.username=}: Date of birth: "
+            f"{self.birth_day}, {self.gender=}"
+        )
 
     def __eq__(self, other: "Hello") -> bool:
         if not isinstance(other, Hello):
@@ -126,6 +143,17 @@ class Config:
     """
     def __init__(self, supported_fields: tuple):
         self.supported_fields = supported_fields
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}"
+            f"(supported_fields={self.supported_fields!r})"
+        )
+
+    def __str__(self) -> str:
+        return (
+            f"Configuration: {self.supported_fields=}"
+        )
 
     def __eq__(self, other: "Config") -> bool:
         if not isinstance(other, Config):
@@ -222,6 +250,49 @@ class SnapshotBinaryBlob:
         self.depth_image = depth_image
         self.feelings = feelings
 
+    def __repr__(self) -> str:
+        splitted_color_image = []
+        for i in range(len(self.color_image)), 3 * BYTE_SIZE_IN_BYTES:
+            splitted_color_image.append(
+                self.color_image[i:i + (3 * BYTE_SIZE_IN_BYTES)]
+            )
+        splitted_depth_image = []
+        for i in range(len(self.depth_image)), FLOAT_SIZE_IN_BYTES:
+            splitted_depth_image.append(
+                self.depth_image[i:i + FLOAT_SIZE_IN_BYTES]
+            )
+
+        return (
+            f"{self.__class__.__name__}\n"
+            f"(timestamp={self.timestamp!r}, \n"
+            f"translation={self.translation[0:UINT64_SIZE_IN_BYTES]!r} \n"
+            f"{self.translation[UINT64_SIZE_IN_BYTES:2 * UINT64_SIZE_IN_BYTES]!r}\n"  # noqa: E501
+            f"{self.translation[2 * UINT64_SIZE_IN_BYTES:3 * UINT64_SIZE_IN_BYTES]!r},\n"  # noqa: E501
+            f"rotation={self.rotation[0:UINT64_SIZE_IN_BYTES]!r} \n"
+            f"{self.rotation[UINT64_SIZE_IN_BYTES:2 * UINT64_SIZE_IN_BYTES]!r}\n"  # noqa: E501
+            f"{self.rotation[2 * UINT64_SIZE_IN_BYTES:3 * UINT64_SIZE_IN_BYTES]!r}\n"  # noqa: E501
+            f"{self.rotation[3 * UINT64_SIZE_IN_BYTES:4 * UINT64_SIZE_IN_BYTES]!r}, \n"  # noqa: E501
+            f"color_image_width={self.color_image_width!r}, \n"
+            f"color_image_height={self.color_image_height!r}, \n"
+            f"color_image={splitted_color_image!r}, \n"
+            f"depth_image_width={self.depth_image_width!r}, \n"
+            f"depth_image_height={self.depth_image_height!r}, \n"
+            f"depth_image={splitted_depth_image!r}, \n"
+            f"feelings={self.feelings[0:FLOAT_SIZE_IN_BYTES]!r} \n"
+            f"{self.feelings[FLOAT_SIZE_IN_BYTES:2 * FLOAT_SIZE_IN_BYTES]!r}\n"
+            f"{self.feelings[2 * UINT64_SIZE_IN_BYTES:3 * FLOAT_SIZE_IN_BYTES]!r}\n"  # noqa: E501
+            f"{self.feelings[3 * FLOAT_SIZE_IN_BYTES:4 * FLOAT_SIZE_IN_BYTES]!r})"  # noqa: E501
+        )
+
+    def __str__(self) -> str:
+        datetime = dt.datetime.fromtimestamp(
+            self.timestamp / 1000, tz=dt.timezone.utc
+        )
+        return (
+            f"A binary representation of a snapshot from: "
+            f"[{datetime::%Y-%m-%d %H:%M:%S:%f}]"
+        )
+
     def __eq__(self, other: "SnapshotBinaryBlob") -> bool:
         if not isinstance(other, SnapshotBinaryBlob):
             return NotImplemented
@@ -255,6 +326,27 @@ class SnapshotMetadata:
         self.depth_image_width = depth_image_width
         self.depth_image_height = depth_image_height
 
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}"
+            f"(timestamp_millisec={self.timestamp!r}, "
+            f"datetime={self.datetime!r}, "
+            f"color_image_width={self.color_image_width!r}, "
+            f"color_image_height={self.color_image_height!r}, "
+            f"depth_image_width={self.depth_image_width!r}, "
+            f"depth_image_height={self.depth_image_height!r})"
+        )
+
+    def __str__(self) -> str:
+        return (
+            f"The metadata of the snapshot: "
+            f"[{self.datetime:%Y-%m-%d %H:%M:%S:%f}] "
+            f"<Image color "
+            f"{self.color_image_width} x {self.color_image_height}> "
+            f"<Depth color "
+            f"{self.depth_image_width} x {self.depth_image_height}>"
+        )
+
     def __eq__(self, other: "SnapshotMetadata") -> bool:
         if not isinstance(other, SnapshotMetadata):
             return NotImplemented
@@ -277,6 +369,20 @@ class Snapshot:
     ):
         self.binary_blob = binary_blob
         self.metadata = metadata
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}"
+            f"(binary_blob={self.binary_blob!r},\n"
+            f"metadata={self.metadata!r})"
+        )
+
+    def __str__(self) -> str:
+        return (
+            f"A snapshot:\n"
+            f"{self.binary_blob},\n"
+            f"{self.metadata}"
+        )
 
     def __len__(self) -> int:
         """

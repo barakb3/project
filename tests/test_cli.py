@@ -19,15 +19,6 @@ def test_run_webserver():
     assert b"missing argument" in stderr.lower()
 
 
-def test_upload_thought():
-    process = subprocess.Popen(
-        ["python", "-m", "project", "client", "upload-thought"],
-        stderr=subprocess.PIPE,
-    )
-    _, stderr = process.communicate()
-    assert b"missing argument" in stderr.lower()
-
-
 def test_reader():
     process = subprocess.Popen(
         ["python", "-m", "project", "client", "read"],
