@@ -10,8 +10,8 @@ from src.constants import (
 from src.protocol import Snapshot, from_bytes
 
 
+# TODO: Document the Reader class.
 class Reader:
-    # TODO: Document this class.
     def __init__(self, path: str) -> None:
         self.file: io.BufferedReader = open(path, "rb")
         self.id: int
@@ -67,9 +67,8 @@ class Reader:
 
 @click.command()
 @click.argument("path")
+# TODO: Document this CLI function.
 def read(path: str):
-    # TODO: Document this CLI function.
     reader = Reader(path)
-    i = 0
     for i, snapshot in enumerate(reader):
-        print(f"snapshot number: {i+1}")
+        print(f"snapshot number: {i+1}, {snapshot.timestamp=}")
