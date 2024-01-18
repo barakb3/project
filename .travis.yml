@@ -9,9 +9,7 @@ env:
   - PYTHONPATH="${PYTHONPATH}:./:../"
 
 script:
-  - pytest --cov
-  - flake8 src
-  - flake8 ./*.py
+  - python scripts/run_ci_checks.py --platform=travis
 
 after_success:
   # Integrity Checking and downloading the Codecov Uploader.
