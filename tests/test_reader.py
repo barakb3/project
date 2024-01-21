@@ -1,4 +1,5 @@
 import struct
+from urllib.parse import urlunparse
 
 import pytest
 
@@ -72,7 +73,7 @@ def snapshot_list() -> bytes:
 
 
 @pytest.fixture
-def sample_path(
+def path(
     tmp_path, metadata: bytes, snapshot_list: bytes  # noqa: ANN001
 ) -> str:
     sample_path = tmp_path / "sample.mind"
@@ -83,15 +84,29 @@ def sample_path(
 
 
 @pytest.fixture
-def reader(sample_path: str) -> Reader:
-    return Reader(path=sample_path)
+def url(
+    path: str,
+    scheme: str = "binary",
+    netloc: str = "",
+    params: str = "",
+    query: str = "",
+    fragment: str = "",
+) -> str:
+    return urlunparse(
+        components=(scheme, netloc, str(path), params, query, fragment)
+    )
+
+
+@pytest.fixture
+def reader(url: str) -> Reader:
+    return Reader(url=url)
 
 
 def test_metadata(reader: Reader):
-    assert reader.user_id == ID  # Property.
-    assert reader.username == NAME  # Property.
-    assert reader.birthday == BIRTHDAY
-    assert reader.gender == GENDER
+    assert reader.user_information.id == ID  # Property.
+    assert reader.user_information.username == NAME  # Property.
+    assert reader.user_information.birthday == BIRTHDAY
+    assert reader.user_information.gender == GENDER
 
 
 def test_reader_as_snapshot_generator(reader: Reader):
