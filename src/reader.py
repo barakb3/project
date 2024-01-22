@@ -48,7 +48,8 @@ class Reader:
 
 def find_driver(scheme: str) -> Callable:
     drivers = {
-        "binary": BinaryDriver
+        "binary": BinaryDriver,
+        "protobuf": ProtobufDriver,
     }
     for driver_scheme, cls in drivers.items():
         if scheme == driver_scheme:

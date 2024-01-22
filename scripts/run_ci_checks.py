@@ -11,9 +11,9 @@ def run_checks(platform: str):
         "ANN101",
     ]
     if platform == "local":
-        flake8_cmd.extend(["--exclude", ".env,.pytest_cache"])
+        flake8_cmd.extend(["--exclude", ".env,.pytest_cache,project_pb2.py"])
     elif platform == "travis":
-        pass
+        flake8_cmd.extend(["--exclude", "project_pb2.py"])
     else:
         print("Platform must be either 'local' ot 'travis'.")
         exit(code=1)
