@@ -49,7 +49,7 @@ from .test_utils import (  # noqa: I101
 
 USER_ID = 1
 USERNAME = "BarakB"
-BIRTH_DAY = 3
+BIRTHDAY = 3
 GENDER = "m"
 
 SUPPORTED_FIELDS = ["translation", "color_image"]
@@ -58,7 +58,7 @@ SUPPORTED_FIELDS = ["translation", "color_image"]
 @pytest.fixture
 def hello() -> Hello:
     return Hello(
-        user_id=USER_ID, username=USERNAME, birth_day=BIRTH_DAY, gender=GENDER
+        user_id=USER_ID, username=USERNAME, birthday=BIRTHDAY, gender=GENDER
     )
 
 

@@ -16,11 +16,11 @@ class Reader:
         self.file: io.BufferedReader = open(path, "rb")
         self.id: int
         self.name: str
-        self.birth_day: int
+        self.birthday: int
         self.gender: str
         self.read_sample_metadata()
 
-        print(f"{self.id=}, {self.name=}, {self.birth_day=}, {self.gender=}")
+        print(f"{self.id=}, {self.name=}, {self.birthday=}, {self.gender=}")
 
     def __iter__(self):
         while True:
@@ -53,7 +53,7 @@ class Reader:
             data_type="string",
             endianness="<",
         )
-        self.birth_day: int = from_bytes(
+        self.birthday: int = from_bytes(
             data=self.file.read(UINT32_SIZE_IN_BYTES),
             data_type="uint32",
             endianness="<",

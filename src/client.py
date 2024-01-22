@@ -25,7 +25,7 @@ def run(address: str, sample_path: str):
     hello_msg = Hello(
         user_id=reader.id,
         username=reader.name,
-        birth_day=reader.birth_day,
+        birthday=reader.birthday,
         gender=reader.gender,
     )
     hello = hello_msg.serialize()

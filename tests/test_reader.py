@@ -90,7 +90,7 @@ def reader(sample_path: str) -> Reader:
 def test_metadata(reader: Reader):
     assert reader.user_id == ID  # Property.
     assert reader.username == NAME  # Property.
-    assert reader.birth_day == BIRTHDAY
+    assert reader.birthday == BIRTHDAY
     assert reader.gender == GENDER
 
 
