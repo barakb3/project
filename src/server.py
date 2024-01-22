@@ -9,20 +9,20 @@ from PIL import Image
 
 import click
 
-from src.constants import (
+from .constants import (
     BYTE_SIZE_IN_BYTES,
     DOUBLE_SIZE_IN_BYTES,
     FLOAT_SIZE_IN_BYTES,
     UINT32_SIZE_IN_BYTES,
     UINT64_SIZE_IN_BYTES,
 )
-from src.protocol import (
+from .protocol import (
     Config,
     Hello,
     NUM_BYTES_PIXEL_COLOR_IMAGE,
     Snapshot,
 )
-from src.utils import Connection, Listener, from_bytes
+from .utils import Connection, Listener, from_bytes
 
 NUM_BYTES_TRANSLATION = 3 * DOUBLE_SIZE_IN_BYTES
 NUM_BYTES_ROTATION = 4 * DOUBLE_SIZE_IN_BYTES
