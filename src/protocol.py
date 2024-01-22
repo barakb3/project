@@ -3,7 +3,7 @@ import io
 import struct
 from typing import Optional, Union
 
-from src.constants import (
+from .constants import (
     BYTE_SIZE_IN_BYTES,
     CHAR_SIZE_IN_BYTES,
     DOUBLE_SIZE_IN_BYTES,
