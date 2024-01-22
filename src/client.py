@@ -42,9 +42,9 @@ def run(address: str, url: str):
             config: Config = Config.deserialize(msg=config_msg)
             supported_fields = config.supported_fields
 
-            snapshot_msg = snapshot.get_supported_fields_msg(
+            supported_snapshot = snapshot.clone_by_supported_fields(
                 supported_fields=supported_fields
             )
 
-            connection.send_message(msg=snapshot_msg)
+            connection.send_message(msg=supported_snapshot.serialize())
         print(f"Client sent {i + 1} snapshots.")

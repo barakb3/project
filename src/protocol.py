@@ -1,34 +1,20 @@
 import datetime as dt
 
 from .constants import (
-    BYTE_SIZE_IN_BYTES,
     CHAR_SIZE_IN_BYTES,
-    DOUBLE_SIZE_IN_BYTES,
-    FLOAT_SIZE_IN_BYTES,
     UINT32_SIZE_IN_BYTES,
     UINT64_SIZE_IN_BYTES,
 )
 from .utils import from_bytes, to_bytes
 
-NUM_BYTES_TIMESTAMP = UINT64_SIZE_IN_BYTES
-NUM_BYTES_TRANSLATION = 3 * DOUBLE_SIZE_IN_BYTES
-NUM_BYTES_ROTATION = 4 * DOUBLE_SIZE_IN_BYTES
-NUM_BYTES_DIMENSION = UINT32_SIZE_IN_BYTES
-NUM_BYTES_FEELINGS = 4 * FLOAT_SIZE_IN_BYTES
 NUM_BYTES_PIXEL_COLOR_IMAGE = 3  # RGB format.
-NUM_BYTES_PIXEL_DEPTH_IMAGE = FLOAT_SIZE_IN_BYTES
 
-CONSTANT_NUM_OF_BYTES_IN_SNAPSHOT = NUM_BYTES_TIMESTAMP + \
-    NUM_BYTES_TRANSLATION + \
-    NUM_BYTES_ROTATION + \
-    (4 * NUM_BYTES_DIMENSION) + \
-    NUM_BYTES_FEELINGS
-
-EMPTY_BINARY_TRANSLATION = b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"  # noqa: E501
-EMPTY_BINARY_ROTATION = b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"  # noqa: E501
-EMPTY_BINARY_COLOR_IMAGE = b"\x00\x00\x00\x00\x00\x00\x00\x00"
-EMPTY_BINARY_DEPTH_IMAGE = b"\x00\x00\x00\x00\x00\x00\x00\x00"
-EMPTY_BINARY_FEELINGS = b"\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00"  # noqa: E501
+EMPTY_TRANSLATION = (0.0, 0.0, 0.0)
+EMPTY_ROTATION = (0.0, 0.0, 0.0, 0.0)
+EMPTY_DIM = 0
+EMPTY_COLOR_IMAGE = b""
+EMPTY_DEPTH_IMAGE = ()
+EMPTY_FEELINGS = (0.0, 0.0, 0.0, 0.0)
 
 
 class Hello:
@@ -205,39 +191,37 @@ class Config:
             data_index == len(msg)
         ), "Message length received doesn't match."
 
-        return Config(supported_fields=supported_fields)
+        return Config(supported_fields=tuple(supported_fields))
 
 
-class SnapshotBinaryBlob:
+class Snapshot:
+    """
+    A class representing the third message in the protocol, a snapshot message.
+    """
     def __init__(
         self,
-        timestamp: bytes,
-        translation: bytes,
-        rotation: bytes,
-        color_image_width: bytes,
-        color_image_height: bytes,
+        timestamp: int,
+        translation: tuple,
+        rotation: tuple,
+        color_image_width: int,
+        color_image_height: int,
         color_image: bytes,
-        depth_image_width: bytes,
-        depth_image_height: bytes,
-        depth_image: bytes,
-        feelings: bytes,
+        depth_image_width: int,
+        depth_image_height: int,
+        depth_image: tuple,
+        feelings: tuple,
     ):
-        assert len(timestamp) == NUM_BYTES_TIMESTAMP
-        assert (
-            len(translation) == NUM_BYTES_TRANSLATION
-        ), "Translation tuple is of length 3."
-        assert (
-            len(rotation) == NUM_BYTES_ROTATION
-        ), "Rotation tuple is of length 4."
-        assert len(color_image_width) == NUM_BYTES_DIMENSION
-        assert len(color_image_height) == NUM_BYTES_DIMENSION
-        assert len(depth_image_width) == NUM_BYTES_DIMENSION
-        assert len(depth_image_height) == NUM_BYTES_DIMENSION
-        assert (
-            len(feelings) == NUM_BYTES_FEELINGS
-        ), "Feelings tuple is of length 4."
-
         self.timestamp = timestamp
+        self.datetime = dt.datetime.fromtimestamp(
+            self.timestamp / 1000, tz=dt.timezone.utc
+        )
+        assert len(translation) == 3
+        assert len(rotation) == 4
+        assert (
+            len(color_image) == NUM_BYTES_PIXEL_COLOR_IMAGE * color_image_width * color_image_height  # noqa: E501
+        )
+        assert len(depth_image) == depth_image_width * depth_image_height
+        assert len(feelings) == 4
         self.translation = translation
         self.rotation = rotation
         self.color_image_width = color_image_width
@@ -249,50 +233,26 @@ class SnapshotBinaryBlob:
         self.feelings = feelings
 
     def __repr__(self) -> str:
-        splitted_color_image = []
-        for i in range(len(self.color_image)), 3 * BYTE_SIZE_IN_BYTES:
-            splitted_color_image.append(
-                self.color_image[i:i + (3 * BYTE_SIZE_IN_BYTES)]
-            )
-        splitted_depth_image = []
-        for i in range(len(self.depth_image)), FLOAT_SIZE_IN_BYTES:
-            splitted_depth_image.append(
-                self.depth_image[i:i + FLOAT_SIZE_IN_BYTES]
-            )
-
         return (
-            f"{self.__class__.__name__}\n"
-            f"(timestamp={self.timestamp!r}, \n"
-            f"translation={self.translation[0:UINT64_SIZE_IN_BYTES]!r} \n"
-            f"{self.translation[UINT64_SIZE_IN_BYTES:2 * UINT64_SIZE_IN_BYTES]!r}\n"  # noqa: E501
-            f"{self.translation[2 * UINT64_SIZE_IN_BYTES:3 * UINT64_SIZE_IN_BYTES]!r},\n"  # noqa: E501
-            f"rotation={self.rotation[0:UINT64_SIZE_IN_BYTES]!r} \n"
-            f"{self.rotation[UINT64_SIZE_IN_BYTES:2 * UINT64_SIZE_IN_BYTES]!r}\n"  # noqa: E501
-            f"{self.rotation[2 * UINT64_SIZE_IN_BYTES:3 * UINT64_SIZE_IN_BYTES]!r}\n"  # noqa: E501
-            f"{self.rotation[3 * UINT64_SIZE_IN_BYTES:4 * UINT64_SIZE_IN_BYTES]!r}, \n"  # noqa: E501
-            f"color_image_width={self.color_image_width!r}, \n"
-            f"color_image_height={self.color_image_height!r}, \n"
-            f"color_image={splitted_color_image!r}, \n"
-            f"depth_image_width={self.depth_image_width!r}, \n"
-            f"depth_image_height={self.depth_image_height!r}, \n"
-            f"depth_image={splitted_depth_image!r}, \n"
-            f"feelings={self.feelings[0:FLOAT_SIZE_IN_BYTES]!r} \n"
-            f"{self.feelings[FLOAT_SIZE_IN_BYTES:2 * FLOAT_SIZE_IN_BYTES]!r}\n"
-            f"{self.feelings[2 * UINT64_SIZE_IN_BYTES:3 * FLOAT_SIZE_IN_BYTES]!r}\n"  # noqa: E501
-            f"{self.feelings[3 * FLOAT_SIZE_IN_BYTES:4 * FLOAT_SIZE_IN_BYTES]!r})"  # noqa: E501
+            f"{self.__class__.__name__}"
+            f"(datetime={self.datetime!r},\n"
+            f"translation={{'x': {self.translation[0]}, 'y': {self.translation[1]}, 'z': {self.translation[2]}}},\n"  # noqa: E501
+            f"rotation={{'x': {self.rotation[0]}, 'y': {self.rotation[1]}, 'z': {self.rotation[2]}, 'w': {self.rotation[3]}}},\n"  # noqa: E501
+            f"color_image=<{self.color_image_width}x{self.color_image_height}>,\n"  # noqa: E501
+            f"depth_image=<{self.depth_image_width}x{self.depth_image_height}>,\n"  # noqa: E501
+            f"feelings={{'x': {self.feelings[0]}, 'y': {self.feelings[1]}, 'z': {self.feelings[2]}, 'w': {self.feelings[3]}}})"  # noqa: E501
         )
 
     def __str__(self) -> str:
-        datetime = dt.datetime.fromtimestamp(
-            self.timestamp / 1000, tz=dt.timezone.utc
-        )
         return (
-            f"A binary representation of a snapshot from: "
-            f"[{datetime::%Y-%m-%d %H:%M:%S:%f}]"
+            f"{self.datetime:%Y-%m-%d %H:%M:%S:%f}, {self.translation=}, {self.rotation=}, "  # noqa: E501
+            f"color_image=<{self.color_image_width}x{self.color_image_height}>, "  # noqa: E501
+            f"depth_image=<{self.depth_image_width}x{self.depth_image_height}>, "  # noqa: E501
+            f"{self.feelings=}"
         )
 
-    def __eq__(self, other: "SnapshotBinaryBlob") -> bool:
-        if not isinstance(other, SnapshotBinaryBlob):
+    def __eq__(self, other: "Snapshot") -> bool:
+        if not isinstance(other, Snapshot):
             return NotImplemented
         return self.timestamp == other.timestamp and \
             self.translation == other.translation and \
@@ -305,126 +265,98 @@ class SnapshotBinaryBlob:
             self.depth_image == other.depth_image and \
             self.feelings == other.feelings
 
-
-class SnapshotMetadata:
-    def __init__(
-        self,
-        timestamp: int,
-        color_image_width: int,
-        color_image_height: int,
-        depth_image_width: int,
-        depth_image_height: int,
-    ):
-        self.timestamp = timestamp
-        self.datetime = dt.datetime.fromtimestamp(
-            self.timestamp / 1000, tz=dt.timezone.utc
-        )
-        self.color_image_width = color_image_width
-        self.color_image_height = color_image_height
-        self.depth_image_width = depth_image_width
-        self.depth_image_height = depth_image_height
-
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}"
-            f"(timestamp_millisec={self.timestamp!r}, "
-            f"datetime={self.datetime!r}, "
-            f"color_image_width={self.color_image_width!r}, "
-            f"color_image_height={self.color_image_height!r}, "
-            f"depth_image_width={self.depth_image_width!r}, "
-            f"depth_image_height={self.depth_image_height!r})"
-        )
-
-    def __str__(self) -> str:
-        return (
-            f"The metadata of the snapshot: "
-            f"[{self.datetime:%Y-%m-%d %H:%M:%S:%f}] "
-            f"<Image color "
-            f"{self.color_image_width} x {self.color_image_height}> "
-            f"<Depth color "
-            f"{self.depth_image_width} x {self.depth_image_height}>"
-        )
-
-    def __eq__(self, other: "SnapshotMetadata") -> bool:
-        if not isinstance(other, SnapshotMetadata):
-            return NotImplemented
-        return self.timestamp == other.timestamp and \
-            self.datetime == other.datetime and \
-            self.color_image_width == other.color_image_width and \
-            self.color_image_height == other.color_image_height and \
-            self.depth_image_width == other.depth_image_width and \
-            self.depth_image_height == other.depth_image_height
-
-
-class Snapshot:
-    """
-    A class representing the third message in the protocol, a snapshot message.
-    """
-    def __init__(
-        self,
-        binary_blob: SnapshotBinaryBlob,
-        metadata: SnapshotMetadata,
-    ):
-        self.binary_blob = binary_blob
-        self.metadata = metadata
-
-    def __repr__(self) -> str:
-        return (
-            f"{self.__class__.__name__}"
-            f"(binary_blob={self.binary_blob!r},\n"
-            f"metadata={self.metadata!r})"
-        )
-
-    def __str__(self) -> str:
-        return (
-            f"A snapshot:\n"
-            f"{self.binary_blob},\n"
-            f"{self.metadata}"
-        )
-
-    def __len__(self) -> int:
-        """
-        Returns the number of bytes that make up the snapshot.
-        """
-        return CONSTANT_NUM_OF_BYTES_IN_SNAPSHOT + \
-            (NUM_BYTES_PIXEL_COLOR_IMAGE * self.metadata.color_image_width * self.metadata.color_image_height) + \
-            (NUM_BYTES_PIXEL_DEPTH_IMAGE * self.metadata.depth_image_width * self.metadata.depth_image_height)  # noqa: E501
-
-    def __eq__(self, other: "Snapshot") -> bool:
-        if not isinstance(other, Snapshot):
-            return NotImplemented
-        return self.binary_blob == other.binary_blob and \
-            self.metadata == other.metadata
-
-    @property
-    def timestamp(self) -> str:
-        return f"{self.metadata.datetime:%Y-%m-%d_%H-%M-%S-%f}"
-
-    def get_supported_fields_msg(self, supported_fields: tuple) -> bytes:
+    def serialize(self) -> bytes:
         msg = bytearray()
-        msg += self.binary_blob.timestamp
-        if "translation" in supported_fields:
-            msg += self.binary_blob.translation
-        else:
-            msg += EMPTY_BINARY_TRANSLATION
-        if "rotation" in supported_fields:
-            msg += self.binary_blob.rotation
-        else:
-            msg += EMPTY_BINARY_ROTATION
-        if "color_image" in supported_fields:
-            msg += self.binary_blob.color_image_width + \
-                self.binary_blob.color_image_height + \
-                self.binary_blob.color_image
-        else:
-            msg += EMPTY_BINARY_COLOR_IMAGE
-        if "depth_image" in supported_fields:
-            msg += self.binary_blob.depth_image_width + \
-                self.binary_blob.depth_image_height + \
-                self.binary_blob.depth_image
-        else:
-            msg += EMPTY_BINARY_DEPTH_IMAGE
-        if "feelings" in supported_fields:
-            msg += self.binary_blob.feelings
-        else:
-            msg += EMPTY_BINARY_FEELINGS
+        msg += to_bytes(
+            value=self.timestamp,
+            data_type="uint64",
+            endianness="<",
+        )
+        for coordinate in self.translation:
+            msg += to_bytes(
+                value=coordinate,
+                data_type="double",
+                endianness="<",
+            )
+        for coordinate in self.rotation:
+            msg += to_bytes(
+                value=coordinate,
+                data_type="double",
+                endianness="<",
+            )
+        msg += to_bytes(
+            value=self.color_image_width,
+            data_type="uint32",
+            endianness="<",
+        )
+        msg += to_bytes(
+            value=self.color_image_height,
+            data_type="uint32",
+            endianness="<",
+        )
+        msg += self.color_image
+        msg += to_bytes(
+            value=self.depth_image_width,
+            data_type="uint32",
+            endianness="<",
+        )
+        msg += to_bytes(
+            value=self.depth_image_height,
+            data_type="uint32",
+            endianness="<",
+        )
+        for pixel in range(self.depth_image_width * self.depth_image_height):
+            msg += to_bytes(
+                value=pixel,
+                data_type="float",
+                endianness="<",
+            )
+        for feeling in self.rotation:
+            msg += to_bytes(
+                value=feeling,
+                data_type="float",
+                endianness="<",
+            )
         return msg
+
+    def clone_by_supported_fields(self, supported_fields: tuple) -> "Snapshot":
+        if "translation" in supported_fields:
+            translation = self.translation
+        else:
+            translation = EMPTY_TRANSLATION
+        if "rotation" in supported_fields:
+            rotation = self.rotation
+        else:
+            rotation = EMPTY_ROTATION
+        if "color_image" in supported_fields:
+            color_image_width = self.color_image_width
+            color_image_height = self.color_image_height
+            color_image = self.color_image
+        else:
+            color_image_width = EMPTY_DIM
+            color_image_height = EMPTY_DIM
+            color_image = EMPTY_COLOR_IMAGE
+        if "depth_image" in supported_fields:
+            depth_image_width = self.depth_image_width
+            depth_image_height = self.depth_image_height
+            depth_image = self.depth_image
+        else:
+            depth_image_width = EMPTY_DIM
+            depth_image_height = EMPTY_DIM
+            depth_image = EMPTY_DEPTH_IMAGE
+        if "feelings" in supported_fields:
+            feelings = self.rotation
+        else:
+            feelings = EMPTY_FEELINGS
+        return Snapshot(
+            timestamp=self.timestamp,
+            translation=translation,
+            rotation=rotation,
+            color_image_width=color_image_width,
+            color_image_height=color_image_height,
+            color_image=color_image,
+            depth_image_width=depth_image_width,
+            depth_image_height=depth_image_height,
+            depth_image=depth_image,
+            feelings=feelings,
+        )

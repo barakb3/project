@@ -8,16 +8,12 @@ from ..constants import (
     UINT32_SIZE_IN_BYTES,
     UINT64_SIZE_IN_BYTES,
 )
-from ..protocol import Snapshot, SnapshotBinaryBlob, SnapshotMetadata
+from ..protocol import Snapshot
 from ..utils import from_bytes
 
 NUM_BYTES_TIMESTAMP = UINT64_SIZE_IN_BYTES
-NUM_BYTES_TRANSLATION = 3 * DOUBLE_SIZE_IN_BYTES
-NUM_BYTES_ROTATION = 4 * DOUBLE_SIZE_IN_BYTES
 NUM_BYTES_DIMENSION = UINT32_SIZE_IN_BYTES
-NUM_BYTES_FEELINGS = 4 * FLOAT_SIZE_IN_BYTES
 NUM_BYTES_PIXEL_COLOR_IMAGE = 3  # RGB format.
-NUM_BYTES_PIXEL_DEPTH_IMAGE = FLOAT_SIZE_IN_BYTES
 
 
 class BinaryDriver:
@@ -59,67 +55,126 @@ class BinaryDriver:
         binary_timestamp = self.file.read(NUM_BYTES_TIMESTAMP)
         if binary_timestamp == b"":
             # EOF reached.
+            self.file.close()
             return None
         timestamp = from_bytes(
             data=binary_timestamp, data_type="uint64", endianness="<"
         )
-        binary_translation = self.file.read(NUM_BYTES_TRANSLATION)
-        binary_rotation = self.file.read(NUM_BYTES_ROTATION)
-        binary_color_image_height = self.file.read(NUM_BYTES_DIMENSION)
+        Translation = namedtuple("translation", ["x", "y", "z"])
+        translation = Translation(
+            x=from_bytes(
+                data=self.file.read(DOUBLE_SIZE_IN_BYTES),
+                data_type="double",
+                endianness="<",
+            ),
+            y=from_bytes(
+                data=self.file.read(DOUBLE_SIZE_IN_BYTES),
+                data_type="double",
+                endianness="<",
+            ),
+            z=from_bytes(
+                data=self.file.read(DOUBLE_SIZE_IN_BYTES),
+                data_type="double",
+                endianness="<",
+            ),
+        )
+        Rotation = namedtuple("rotation", ["x", "y", "z", "w"])
+        rotation = Rotation(
+            x=from_bytes(
+                data=self.file.read(DOUBLE_SIZE_IN_BYTES),
+                data_type="double",
+                endianness="<",
+            ),
+            y=from_bytes(
+                data=self.file.read(DOUBLE_SIZE_IN_BYTES),
+                data_type="double",
+                endianness="<",
+            ),
+            z=from_bytes(
+                data=self.file.read(DOUBLE_SIZE_IN_BYTES),
+                data_type="double",
+                endianness="<",
+            ),
+            w=from_bytes(
+                data=self.file.read(DOUBLE_SIZE_IN_BYTES),
+                data_type="double",
+                endianness="<",
+            ),
+        )
         color_image_height = from_bytes(
-            data=binary_color_image_height, data_type="uint32", endianness="<"
+            data=self.file.read(NUM_BYTES_DIMENSION),
+            data_type="uint32",
+            endianness="<",
         )
-        binary_color_image_width = self.file.read(NUM_BYTES_DIMENSION)
         color_image_width = from_bytes(
-            data=binary_color_image_width, data_type="uint32", endianness="<"
+            data=self.file.read(NUM_BYTES_DIMENSION),
+            data_type="uint32",
+            endianness="<",
         )
-        binary_color_image = from_bgr_to_rgb(
+        color_image = from_bgr_to_rgb(
             bgr=self.file.read(
                 NUM_BYTES_PIXEL_COLOR_IMAGE * color_image_width * color_image_height  # noqa: E501
             )
         )
         assert (
-            len(binary_color_image) == NUM_BYTES_PIXEL_COLOR_IMAGE * color_image_width * color_image_height  # noqa: E501
+            len(color_image) == NUM_BYTES_PIXEL_COLOR_IMAGE * color_image_width * color_image_height  # noqa: E501
         )
-        binary_depth_image_height = self.file.read(NUM_BYTES_DIMENSION)
         depth_image_height = from_bytes(
-            data=binary_depth_image_height, data_type="uint32", endianness="<"
+            data=self.file.read(NUM_BYTES_DIMENSION),
+            data_type="uint32",
+            endianness="<",
         )
-        binary_depth_image_width = self.file.read(NUM_BYTES_DIMENSION)
         depth_image_width = from_bytes(
-            data=binary_depth_image_width, data_type="uint32", endianness="<"
+            data=self.file.read(NUM_BYTES_DIMENSION),
+            data_type="uint32",
+            endianness="<",
         )
-        binary_depth_image = self.file.read(
-            NUM_BYTES_PIXEL_DEPTH_IMAGE * depth_image_width * depth_image_height  # noqa: E501
+        depth_image = []
+        for _ in range(depth_image_width * depth_image_height):
+            depth_image.append(
+                from_bytes(
+                    data=self.file.read(FLOAT_SIZE_IN_BYTES),
+                    data_type="float",
+                    endianness="<",
+                )
+            )
+        Feelings = namedtuple(
+            "feelings", ["hunger", "thirst", "exhaustion", "happiness"]
         )
-        assert (
-            len(binary_depth_image) == NUM_BYTES_PIXEL_DEPTH_IMAGE * depth_image_width * depth_image_height  # noqa: E501
-        )
-        binary_feelings = self.file.read(NUM_BYTES_FEELINGS)
-
-        binary_blob = SnapshotBinaryBlob(
-            timestamp=binary_timestamp,
-            translation=binary_translation,
-            rotation=binary_rotation,
-            color_image_width=binary_color_image_width,
-            color_image_height=binary_color_image_height,
-            color_image=binary_color_image,
-            depth_image_width=binary_depth_image_width,
-            depth_image_height=binary_depth_image_height,
-            depth_image=binary_depth_image,
-            feelings=binary_feelings,
-        )
-        metadata = SnapshotMetadata(
-            timestamp=timestamp,
-            color_image_width=color_image_width,
-            color_image_height=color_image_height,
-            depth_image_width=depth_image_width,
-            depth_image_height=depth_image_height,
+        feelings = Feelings(
+            hunger=from_bytes(
+                data=self.file.read(FLOAT_SIZE_IN_BYTES),
+                data_type="float",
+                endianness="<",
+            ),
+            thirst=from_bytes(
+                data=self.file.read(FLOAT_SIZE_IN_BYTES),
+                data_type="float",
+                endianness="<",
+            ),
+            exhaustion=from_bytes(
+                data=self.file.read(FLOAT_SIZE_IN_BYTES),
+                data_type="float",
+                endianness="<",
+            ),
+            happiness=from_bytes(
+                data=self.file.read(FLOAT_SIZE_IN_BYTES),
+                data_type="float",
+                endianness="<",
+            ),
         )
 
         return Snapshot(
-            binary_blob=binary_blob,
-            metadata=metadata,
+            timestamp=timestamp,
+            translation=translation,
+            rotation=rotation,
+            color_image_width=color_image_width,
+            color_image_height=color_image_height,
+            color_image=color_image,
+            depth_image_width=depth_image_width,
+            depth_image_height=depth_image_height,
+            depth_image=tuple(depth_image),
+            feelings=feelings,
         )
 
 

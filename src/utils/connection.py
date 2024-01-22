@@ -2,8 +2,9 @@ import socket
 import time
 import traceback
 
+from src.constants import UINT32_SIZE_IN_BYTES
+
 from .binary_converter import from_bytes, to_bytes
-from ..constants import UINT32_SIZE_IN_BYTES
 
 
 CHUNK_SIZE_IN_BYTES = 2 ** 12
