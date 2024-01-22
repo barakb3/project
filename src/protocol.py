@@ -38,11 +38,11 @@ class Hello:
     A class representing the first message in the protocol, a hello message.
     """
     def __init__(
-        self, user_id: int, username: str, birth_day: int, gender: str
+        self, user_id: int, username: str, birthday: int, gender: str
     ):
         self.user_id = user_id
         self.username = username
-        self.birth_day = birth_day
+        self.birthday = birthday
         self.gender = gender
 
     def __repr__(self) -> str:
@@ -50,7 +50,7 @@ class Hello:
             f"{self.__class__.__name__}"
             f"(user_id={self.user_id!r}, "
             f"username={self.username!r}, "
-            f"birth_day={self.birth_day!r}, "
+            f"birthday={self.birthday!r}, "
             f"gender={self.gender!r})"
         )
 
@@ -58,7 +58,7 @@ class Hello:
         return (
             f"[{self.user_id=}] "
             f"{self.username=}: Date of birth: "
-            f"{self.birth_day}, {self.gender=}"
+            f"{self.birthday}, {self.gender=}"
         )
 
     def __eq__(self, other: "Hello") -> bool:
@@ -66,7 +66,7 @@ class Hello:
             return NotImplemented
         return self.user_id == other.user_id and \
             self.username == other.username and \
-            self.birth_day == other.birth_day and \
+            self.birthday == other.birthday and \
             self.gender == other.gender
 
     def serialize(self) -> bytes:
@@ -80,7 +80,7 @@ class Hello:
             value=self.username, data_type="string", endianness="<"
         )
         serialized += to_bytes(
-            value=self.birth_day, data_type="uint32", endianness="<"
+            value=self.birthday, data_type="uint32", endianness="<"
         )
         serialized += to_bytes(
             value=self.gender, data_type="char", endianness="<"
@@ -111,7 +111,7 @@ class Hello:
         )
         data_index += username_length
 
-        birth_day = from_bytes(
+        birthday = from_bytes(
             data=msg[data_index:data_index + UINT32_SIZE_IN_BYTES],
             data_type="uint32",
             endianness="<",
@@ -132,7 +132,7 @@ class Hello:
         return Hello(
             user_id=user_id,
             username=username,
-            birth_day=birth_day,
+            birthday=birthday,
             gender=gender,
         )
 
