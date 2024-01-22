@@ -1,68 +1,60 @@
-import io
+from typing import Callable, Union
+from urllib.parse import urlparse
 
 import click
 
-from .constants import (
-    CHAR_SIZE_IN_BYTES,
-    UINT32_SIZE_IN_BYTES,
-    UINT64_SIZE_IN_BYTES,
-)
-from .protocol import Snapshot, from_bytes
+from .drivers import BinaryDriver, ProtobufDriver
 
 
-# TODO: Document the Reader class.
 class Reader:
-    def __init__(self, path: str) -> None:
-        self.file: io.BufferedReader = open(path, "rb")
-        self.id: int
-        self.name: str
-        self.birthday: int
-        self.gender: str
-        self.read_sample_metadata()
+    """
+    A class that reads a user sample containing thoughts.
+    When initialized, it reads the user information and then functions as a
+    snapshot generator.
 
-        print(f"{self.id=}, {self.name=}, {self.birthday=}, {self.gender=}")
+    :param url: scheme://username:password@host:port/path?key=value#fragment
+    :type address: str
+
+    """
+    def __init__(self, url: str) -> None:
+        parsed_url = urlparse(url=url)
+        self.driver: Union[BinaryDriver, ProtobufDriver] = find_driver(
+            scheme=parsed_url.scheme
+        )(parsed_url.path)
+        self.user_information = self.driver.get_user_information()
+
+        print(
+            f"{self.user_information.id=}, "
+            f"{self.user_information.username=}, "
+            f"{self.user_information.birthday=}, "
+            f"{self.user_information.gender=}."
+        )
 
     def __iter__(self):
         while True:
-            curr_snapshot = Snapshot.read_from_file(file=self.file)
+            curr_snapshot = self.driver.get_snapshot()
             if curr_snapshot is None:
                 break
             yield curr_snapshot
 
     @property
     def user_id(self) -> int:
-        return self.id
+        return self.user_information.id
 
     @property
     def username(self) -> str:
-        return self.name
+        return self.user_information.username
 
-    def read_sample_metadata(self):
-        self.id: int = from_bytes(
-            data=self.file.read(UINT64_SIZE_IN_BYTES),
-            data_type="uint64",
-            endianness="<",
-        )
-        name_length: int = from_bytes(
-            data=self.file.read(UINT32_SIZE_IN_BYTES),
-            data_type="uint32",
-            endianness="<",
-        )
-        self.name: str = from_bytes(
-            data=self.file.read(name_length),
-            data_type="string",
-            endianness="<",
-        )
-        self.birthday: int = from_bytes(
-            data=self.file.read(UINT32_SIZE_IN_BYTES),
-            data_type="uint32",
-            endianness="<",
-        )
-        self.gender: str = from_bytes(
-            data=self.file.read(CHAR_SIZE_IN_BYTES),
-            data_type="char",
-            endianness="<",
-        )
+
+def find_driver(scheme: str) -> Callable:
+    drivers = {
+        "binary": BinaryDriver
+    }
+    for driver_scheme, cls in drivers.items():
+        if scheme == driver_scheme:
+            return cls
+    else:
+        raise Exception(f"Scheme '{scheme}' is not supported.")
 
 
 @click.command()

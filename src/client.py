@@ -8,25 +8,25 @@ from .utils import Connection
 
 @click.command()
 @click.argument("address")
-@click.argument("sample_path")
-def run(address: str, sample_path: str):
+@click.argument("url")
+def run(address: str, url: str):
     """
     Upload some snapshots from a file to the server.
 
     :param address: A host and a port, e.g.: 127.0.0.1:5000.
     :type address: str
-    :param sample_path: A path to the file.
-    :type sample_path: str ot Path-like objects
+    :param url: scheme://username:password@host:port/path?key=value#fragment.
+    :type url: str
 
     """
     ip, port = address.split(":", 1)
-    reader = Reader(path=sample_path)
+    reader = Reader(url=url)
 
     hello_msg = Hello(
-        user_id=reader.id,
-        username=reader.name,
-        birthday=reader.birthday,
-        gender=reader.gender,
+        user_id=reader.user_information.id,
+        username=reader.user_information.username,
+        birthday=reader.user_information.birthday,
+        gender=reader.user_information.gender,
     )
     hello = hello_msg.serialize()
 
