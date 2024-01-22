@@ -1,9 +1,9 @@
 import click
 
-from src.constants import UINT32_SIZE_IN_BYTES
-from src.protocol import Config, Hello, Snapshot
-from src.reader import Reader
-from src.utils import Connection
+from .constants import UINT32_SIZE_IN_BYTES
+from .protocol import Config, Hello, Snapshot
+from .reader import Reader
+from .utils import Connection
 
 
 @click.command()

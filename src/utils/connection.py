@@ -5,6 +5,7 @@ import traceback
 from ..constants import UINT32_SIZE_IN_BYTES
 from ..protocol import from_bytes, to_bytes
 
+
 CHUNK_SIZE_IN_BYTES = 2 ** 12
 
 
