@@ -9,24 +9,25 @@ from PIL import Image
 
 import click
 
-from .constants import (
+from src.constants import (
     BYTE_SIZE_IN_BYTES,
     DOUBLE_SIZE_IN_BYTES,
+    FLOAT_SIZE_IN_BYTES,
     UINT32_SIZE_IN_BYTES,
     UINT64_SIZE_IN_BYTES,
 )
-from .protocol import (
+from src.protocol import (
     Config,
     Hello,
-    NUM_BYTES_FEELINGS,
     NUM_BYTES_PIXEL_COLOR_IMAGE,
-    NUM_BYTES_PIXEL_DEPTH_IMAGE,
-    NUM_BYTES_ROTATION,
-    NUM_BYTES_TRANSLATION,
     Snapshot,
-    from_bytes,
 )
-from .utils import Connection, Listener
+from src.utils import Connection, Listener, from_bytes
+
+NUM_BYTES_TRANSLATION = 3 * DOUBLE_SIZE_IN_BYTES
+NUM_BYTES_ROTATION = 4 * DOUBLE_SIZE_IN_BYTES
+NUM_BYTES_PIXEL_DEPTH_IMAGE = FLOAT_SIZE_IN_BYTES
+NUM_BYTES_FEELINGS = 4 * FLOAT_SIZE_IN_BYTES
 
 
 class Parser:

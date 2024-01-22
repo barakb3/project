@@ -1,58 +1,47 @@
 import pytest
 
 from src.protocol import (
-    CONSTANT_NUM_OF_BYTES_IN_SNAPSHOT,
     Config,
-    EMPTY_BINARY_COLOR_IMAGE,
-    EMPTY_BINARY_DEPTH_IMAGE,
-    EMPTY_BINARY_FEELINGS,
-    EMPTY_BINARY_ROTATION,
-    EMPTY_BINARY_TRANSLATION,
+    EMPTY_COLOR_IMAGE,
+    EMPTY_DEPTH_IMAGE,
+    EMPTY_DIM,
+    EMPTY_FEELINGS,
+    EMPTY_ROTATION,
+    EMPTY_TRANSLATION,
     Hello,
     Snapshot,
-    SnapshotBinaryBlob,
-    SnapshotMetadata,
 )
 
-from .test_utils import (  # noqa: I101
-    BINARY_TIMESTAMP_1,
-    BINARY_TRANSLATION_1,
-    BINARY_ROTATION_1,
-    BINARY_COLOR_IMAGE_HEIGHT_1,
-    BINARY_COLOR_IMAGE_WIDTH_1,
-    BINARY_COLOR_IMAGE_1,
-    BINARY_DEPTH_IMAGE_HEIGHT_1,
-    BINARY_DEPTH_IMAGE_WIDTH_1,
-    BINARY_DEPTH_IMAGE_1,
-    BINARY_FEELINGS_1,
-    TIMESTAMP_1,
-    COLOR_IMAGE_WIDTH_1,
-    COLOR_IMAGE_HEIGHT_1,
-    DEPTH_IMAGE_WIDTH_1,
-    DEPTH_IMAGE_HEIGHT_1,
-    BINARY_TIMESTAMP_2,
-    BINARY_TRANSLATION_2,
-    BINARY_ROTATION_2,
-    BINARY_COLOR_IMAGE_HEIGHT_2,
-    BINARY_COLOR_IMAGE_WIDTH_2,
-    BINARY_COLOR_IMAGE_2,
-    BINARY_DEPTH_IMAGE_HEIGHT_2,
-    BINARY_DEPTH_IMAGE_WIDTH_2,
-    BINARY_DEPTH_IMAGE_2,
-    BINARY_FEELINGS_2,
-    TIMESTAMP_2,
-    COLOR_IMAGE_WIDTH_2,
-    COLOR_IMAGE_HEIGHT_2,
-    DEPTH_IMAGE_WIDTH_2,
-    DEPTH_IMAGE_HEIGHT_2
-)
+# Snapshot 1.
+TIMESTAMP_1 = 1000
+TRANSLATION_1 = (1.1, 1.2, 1.3)
+ROTATION_1 = (1.1, 1.2, 1.3, 1.4)
+COLOR_IMAGE_WIDTH_1 = 2
+COLOR_IMAGE_HEIGHT_1 = 2
+COLOR_IMAGE_1 = b"\xff\x00\x00\xff\x00\x00\xff\x00\x00\xff\x00\x00"
+DEPTH_IMAGE_WIDTH_1 = 2
+DEPTH_IMAGE_HEIGHT_1 = 2
+DEPTH_IMAGE_1 = [1.0, 1.0, 1.0, 1.0]
+FEELINGS_1 = (1.1, 1.2, 1.3, 1.4)
+
+# Snapshot 2.
+TIMESTAMP_2 = 2000
+TRANSLATION_2 = (2.1, 2.2, 2.3)
+ROTATION_2 = (2.1, 2.2, 2.3, 2.4)
+COLOR_IMAGE_WIDTH_2 = 2
+COLOR_IMAGE_HEIGHT_2 = 3
+COLOR_IMAGE_2 = b"\x00\xff\x00\x00\xff\x00\x00\xff\x00\x00\xff\x00\x00\xff\x00\x00\xff\x00"  # noqa: E501
+DEPTH_IMAGE_WIDTH_2 = 2
+DEPTH_IMAGE_HEIGHT_2 = 3
+DEPTH_IMAGE_2 = [2.0, 2.0, 2.0, 2.0, 2.0, 2.0]
+FEELINGS_2 = (2.1, 2.2, 2.3, 2.4)
 
 USER_ID = 1
 USERNAME = "BarakB"
 BIRTHDAY = 3
 GENDER = "m"
 
-SUPPORTED_FIELDS = ["translation", "color_image"]
+SUPPORTED_FIELDS = ("translation", "color_image")
 
 
 @pytest.fixture
@@ -70,25 +59,16 @@ def config() -> Config:
 @pytest.fixture
 def snapshot() -> Snapshot:
     return Snapshot(
-        binary_blob=SnapshotBinaryBlob(
-            timestamp=BINARY_TIMESTAMP_1,
-            translation=BINARY_TRANSLATION_1,
-            rotation=BINARY_ROTATION_1,
-            color_image_width=BINARY_COLOR_IMAGE_WIDTH_1,
-            color_image_height=BINARY_COLOR_IMAGE_HEIGHT_1,
-            color_image=BINARY_COLOR_IMAGE_1,
-            depth_image_width=BINARY_DEPTH_IMAGE_WIDTH_1,
-            depth_image_height=BINARY_DEPTH_IMAGE_HEIGHT_1,
-            depth_image=BINARY_DEPTH_IMAGE_1,
-            feelings=BINARY_FEELINGS_1,
-        ),
-        metadata=SnapshotMetadata(
-            timestamp=TIMESTAMP_1,
-            color_image_width=COLOR_IMAGE_WIDTH_1,
-            color_image_height=COLOR_IMAGE_HEIGHT_1,
-            depth_image_width=DEPTH_IMAGE_WIDTH_1,
-            depth_image_height=DEPTH_IMAGE_HEIGHT_1
-        ),
+        timestamp=TIMESTAMP_1,
+        translation=TRANSLATION_1,
+        rotation=ROTATION_1,
+        color_image_width=COLOR_IMAGE_WIDTH_1,
+        color_image_height=COLOR_IMAGE_HEIGHT_1,
+        color_image=COLOR_IMAGE_1,
+        depth_image_width=DEPTH_IMAGE_WIDTH_1,
+        depth_image_height=DEPTH_IMAGE_HEIGHT_1,
+        depth_image=DEPTH_IMAGE_1,
+        feelings=FEELINGS_1,
     )
 
 
@@ -100,66 +80,64 @@ def test_config_serde(config: Config):
     assert config == Config.deserialize(config.serialize())
 
 
-def test_snapshot_length(snapshot: Snapshot):
-    assert len(snapshot) == CONSTANT_NUM_OF_BYTES_IN_SNAPSHOT  # noqa: E501
-
-
 def test_snapshot_eq(snapshot: Snapshot):
     other_snapshot = Snapshot(
-        binary_blob=SnapshotBinaryBlob(
-            timestamp=BINARY_TIMESTAMP_2,
-            translation=BINARY_TRANSLATION_2,
-            rotation=BINARY_ROTATION_2,
-            color_image_width=BINARY_COLOR_IMAGE_WIDTH_2,
-            color_image_height=BINARY_COLOR_IMAGE_HEIGHT_2,
-            color_image=BINARY_COLOR_IMAGE_2,
-            depth_image_width=BINARY_DEPTH_IMAGE_WIDTH_2,
-            depth_image_height=BINARY_DEPTH_IMAGE_HEIGHT_2,
-            depth_image=BINARY_DEPTH_IMAGE_2,
-            feelings=BINARY_FEELINGS_2,
-        ),
-        metadata=SnapshotMetadata(
-            timestamp=TIMESTAMP_2,
-            color_image_width=COLOR_IMAGE_WIDTH_2,
-            color_image_height=COLOR_IMAGE_HEIGHT_2,
-            depth_image_width=DEPTH_IMAGE_WIDTH_2,
-            depth_image_height=DEPTH_IMAGE_HEIGHT_2
-        ),
+        timestamp=TIMESTAMP_2,
+        translation=TRANSLATION_2,
+        rotation=ROTATION_2,
+        color_image_width=COLOR_IMAGE_WIDTH_2,
+        color_image_height=COLOR_IMAGE_HEIGHT_2,
+        color_image=COLOR_IMAGE_2,
+        depth_image_width=DEPTH_IMAGE_WIDTH_2,
+        depth_image_height=DEPTH_IMAGE_HEIGHT_2,
+        depth_image=DEPTH_IMAGE_2,
+        feelings=FEELINGS_2,
     )
     assert snapshot != other_snapshot
 
 
-def test_snapshot_timestamp(snapshot: Snapshot):
-    assert snapshot.timestamp == "1970-01-01_00-00-01-000000"
-
-
-def test_get_supported_fields(snapshot: Snapshot):
-    supported_fields_msg = snapshot.get_supported_fields_msg(
+def test_supported_fields(snapshot: Snapshot):
+    supported_snapshot = snapshot.clone_by_supported_fields(
         supported_fields=SUPPORTED_FIELDS
     )
-    expected = bytearray(BINARY_TIMESTAMP_1)
     if "translation" in SUPPORTED_FIELDS:
-        expected.extend(BINARY_TRANSLATION_1)
+        translation = TRANSLATION_1
     else:
-        expected.extend(EMPTY_BINARY_TRANSLATION)
+        translation = EMPTY_TRANSLATION
     if "rotation" in SUPPORTED_FIELDS:
-        expected.extend(BINARY_ROTATION_1)
+        rotation = ROTATION_1
     else:
-        expected.extend(EMPTY_BINARY_ROTATION)
+        rotation = EMPTY_ROTATION
     if "color_image" in SUPPORTED_FIELDS:
-        expected.extend(
-            BINARY_COLOR_IMAGE_WIDTH_1 + BINARY_COLOR_IMAGE_HEIGHT_1 + BINARY_COLOR_IMAGE_1  # noqa: E501
-        )
+        color_image_width = COLOR_IMAGE_WIDTH_1
+        color_image_height = COLOR_IMAGE_HEIGHT_1
+        color_image = COLOR_IMAGE_1
     else:
-        expected.extend(EMPTY_BINARY_COLOR_IMAGE)
+        color_image_width = EMPTY_DIM
+        color_image_height = EMPTY_DIM
+        color_image = EMPTY_COLOR_IMAGE
     if "depth_image" in SUPPORTED_FIELDS:
-        expected.extend(
-            BINARY_DEPTH_IMAGE_WIDTH_1 + BINARY_DEPTH_IMAGE_HEIGHT_1 + BINARY_DEPTH_IMAGE_1  # noqa: E501
-        )
+        depth_image_width = DEPTH_IMAGE_WIDTH_1
+        depth_image_height = DEPTH_IMAGE_HEIGHT_1
+        depth_image = DEPTH_IMAGE_1
     else:
-        expected.extend(EMPTY_BINARY_DEPTH_IMAGE)
+        depth_image_width = EMPTY_DIM
+        depth_image_height = EMPTY_DIM
+        depth_image = EMPTY_DEPTH_IMAGE
     if "feelings" in SUPPORTED_FIELDS:
-        expected.extend(BINARY_FEELINGS_1)
+        feelings = FEELINGS_1
     else:
-        expected.extend(EMPTY_BINARY_FEELINGS)
-    assert supported_fields_msg == expected
+        feelings = EMPTY_FEELINGS
+    expected = Snapshot(
+        timestamp=TIMESTAMP_1,
+        translation=translation,
+        rotation=rotation,
+        color_image_width=color_image_width,
+        color_image_height=color_image_height,
+        color_image=color_image,
+        depth_image_width=depth_image_width,
+        depth_image_height=depth_image_height,
+        depth_image=depth_image,
+        feelings=feelings,
+    )
+    assert supported_snapshot == expected
