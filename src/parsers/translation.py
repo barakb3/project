@@ -1,11 +1,11 @@
 import json
-from pathlib import Path
 
 from ..constants import DOUBLE_SIZE_IN_BYTES
+from ..server import Context
 from ..utils import from_bytes
 
 
-def parse_translation(snapshot_dir_path: Path, translation_msg: bytes):
+def parse_translation(context: Context, translation_msg: bytes):
     translation = []
     msg_index = 0
     for _ in range(3):
@@ -19,15 +19,16 @@ def parse_translation(snapshot_dir_path: Path, translation_msg: bytes):
             )
         )
         msg_index += DOUBLE_SIZE_IN_BYTES
-    with open(snapshot_dir_path / "translation.json", "w") as writer:
-        json.dump(
+    context.save(
+        file_rel_path="translation.json",
+        content=json.dumps(
             {
                 "x": translation[0],
                 "y": translation[1],
                 "z": translation[2],
-            },
-            writer
+            }
         )
+    )
 
 
 parse_translation.required_fields = ("translation", )

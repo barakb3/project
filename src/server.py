@@ -25,6 +25,29 @@ NUM_BYTES_PIXEL_DEPTH_IMAGE = FLOAT_SIZE_IN_BYTES
 NUM_BYTES_FEELINGS = 4 * FLOAT_SIZE_IN_BYTES
 
 
+class Context:
+    def __init__(self, user_id: int, data_dir_path: str, timestamp: int):
+        self.user_id = user_id
+        self.data_dir_path = data_dir_path
+        self.datetime = dt.datetime.fromtimestamp(
+            timestamp / 1000, tz=dt.timezone.utc  # Timestamp in milliseconds.
+        )
+        self.snapshot_dir_path = Path(
+            self.data_dir_path,
+            f"{self.user_id}",
+            f"{self.datetime:%Y-%m-%d_%H-%M-%S-%f}",
+        )
+        self.snapshot_dir_path.mkdir(parents=True, exist_ok=True)
+
+    def path(self, file_rel_path: str) -> Path:
+        return self.snapshot_dir_path / file_rel_path
+
+    def save(self, file_rel_path: str, content: str):
+        # `file_rel_path` is relative to the snapshot's directory path.
+        with open(self.path(file_rel_path=file_rel_path), "w") as f:
+            f.write(content)
+
+
 class Handler(threading.Thread):
     def __init__(
             self,
@@ -72,14 +95,6 @@ class Handler(threading.Thread):
             endianness="<",
         )
         msg_index += UINT64_SIZE_IN_BYTES
-
-        datetime = dt.datetime.fromtimestamp(
-            timestamp / 1000, tz=dt.timezone.utc  # Timestamp in milliseconds.
-        )
-        snapshot_dir_path = self.data_dir_path / \
-            f"{user_id}" / \
-            f"{datetime:%Y-%m-%d_%H-%M-%S-%f}"
-        snapshot_dir_path.mkdir(parents=True, exist_ok=True)
 
         preprocessed_data = {}
 
@@ -142,12 +157,17 @@ class Handler(threading.Thread):
         ]
         msg_index += NUM_BYTES_FEELINGS
 
+        context = Context(
+            user_id=user_id,
+            data_dir_path=self.data_dir_path,
+            timestamp=timestamp
+        )
         for required_fields, parser in self.parsers.items():
             args = [
                 arg for field, arg in preprocessed_data.items()
                 if field in required_fields
             ]
-            parser(snapshot_dir_path, *args)
+            parser(context, *args)
 
         assert (
             msg_index == len(snapshot_msg)
