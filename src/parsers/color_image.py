@@ -1,9 +1,8 @@
-from pathlib import Path
-
 from PIL import Image
 
 from ..constants import BYTE_SIZE_IN_BYTES, UINT32_SIZE_IN_BYTES
 from ..protocol import NUM_BYTES_PIXEL_COLOR_IMAGE
+from ..server import Context
 from ..utils import from_bytes
 
 
@@ -15,7 +14,7 @@ class ImageColorParser:
 
     # `self` isn't used since there is no need for any "state" changes.
     def parse(
-        self, snapshot_dir_path: Path, color_image_msg: bytes
+        self, context: Context, color_image_msg: bytes
     ):
         msg_index = 0
         color_image_width = from_bytes(
@@ -54,4 +53,4 @@ class ImageColorParser:
             (color_image_width, color_image_height),
         )
         image.putdata(color_image)
-        image.save(snapshot_dir_path / "color_image.jpg")
+        image.save(context.path("color_image.jpg"))
