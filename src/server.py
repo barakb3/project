@@ -1,16 +1,12 @@
 import datetime as dt
-import functools
-import json
+import importlib
+import inspect
 import threading
 from pathlib import Path
-from typing import Callable
-
-from PIL import Image
 
 import click
 
 from .constants import (
-    BYTE_SIZE_IN_BYTES,
     DOUBLE_SIZE_IN_BYTES,
     FLOAT_SIZE_IN_BYTES,
     UINT32_SIZE_IN_BYTES,
@@ -20,7 +16,6 @@ from .protocol import (
     Config,
     Hello,
     NUM_BYTES_PIXEL_COLOR_IMAGE,
-    Snapshot,
 )
 from .utils import Connection, Listener, from_bytes
 
@@ -30,34 +25,20 @@ NUM_BYTES_PIXEL_DEPTH_IMAGE = FLOAT_SIZE_IN_BYTES
 NUM_BYTES_FEELINGS = 4 * FLOAT_SIZE_IN_BYTES
 
 
-class Parser:
-    def __init__(self):
-        self.parsers: dict = {}
-
-    def add_parser(self, name: str) -> Callable:
-        def decorator(f: Callable) -> Callable:
-            @functools.wraps(f)
-            def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN201
-                return f(*args, **kwargs)
-            self.parsers[name] = f
-            return wrapper
-        return decorator
-
-
 class Handler(threading.Thread):
     def __init__(
             self,
             client: Connection,
             data_dir: str,
             lock: threading.Lock,
-            parser: Parser,
+            parsers: dict,
             thread_number: int,
     ):
         super().__init__()
         self.client = client
         self.data_dir_path = Path(data_dir)
         self.lock = lock
-        self.parser = parser
+        self.parsers = parsers
         self.thread_number = thread_number
 
     def run(self):
@@ -66,7 +47,10 @@ class Handler(threading.Thread):
             raise Exception("Incomplete meta data received.")
         user_id = Hello.deserialize(msg=hello_msg).user_id
 
-        config = Config(supported_fields=tuple(self.parser.parsers.keys()))
+        supported_fields = tuple(
+            parser for key in self.parsers.keys() for parser in key
+        )
+        config = Config(supported_fields=supported_fields)
         self.client.send_message(msg=config.serialize())
 
         snapshot_msg = self.client.receive_message()
@@ -158,8 +142,12 @@ class Handler(threading.Thread):
         ]
         msg_index += NUM_BYTES_FEELINGS
 
-        for field_name, parser in self.parser.parsers.items():
-            parser(snapshot_dir_path, preprocessed_data[field_name])
+        for required_fields, parser in self.parsers.items():
+            args = [
+                arg for field, arg in preprocessed_data.items()
+                if field in required_fields
+            ]
+            parser(snapshot_dir_path, *args)
 
         assert (
             msg_index == len(snapshot_msg)
@@ -182,76 +170,26 @@ def run_server(address: str, data_dir: str):
     """
     ip, port = address.split(":", 1)
     with Listener(port=int(port), host=ip) as listener:
-        parser = Parser()
+        package_name = __package__.split(".")[-1]
+        root_pkg_abs_path = Path.cwd() / package_name
+        parsers_rel_path = Path("./parsers")
 
-        @parser.add_parser("translation")
-        def parse_translation(snapshot_dir_path: Path, translation_msg: bytes):
-            translation = []
-            msg_index = 0
-            for _ in range(3):
-                translation.append(
-                    from_bytes(
-                        data=translation_msg[
-                            msg_index:msg_index + DOUBLE_SIZE_IN_BYTES
-                        ],
-                        data_type="double",
-                        endianness="<",
-                    )
-                )
-                msg_index += DOUBLE_SIZE_IN_BYTES
-
-            with open(snapshot_dir_path / "translation.json", "w") as writer:
-                json.dump(
-                    {
-                        "x": translation[0],
-                        "y": translation[1],
-                        "z": translation[2],
-                    },
-                    writer
-                )
-
-        @parser.add_parser("color_image")
-        def parse_color_image(
-            snapshot_dir_path: Path, color_image_msg: Snapshot
-        ):
-            msg_index = 0
-            color_image_width = from_bytes(
-                data=color_image_msg[
-                    msg_index:msg_index + UINT32_SIZE_IN_BYTES
-                ],
-                data_type="uint32",
-                endianness="<",
+        parsers: dict = {}
+        for path in Path(root_pkg_abs_path, parsers_rel_path).iterdir():
+            if path.name.startswith("_") or not path.suffix == ".py":
+                continue
+            pkg_name = str(root_pkg_abs_path).split("/")[-1]
+            rel_module_name = "." + ".".join(parsers_rel_path.parts)
+            parser_module = importlib.import_module(
+                f"{rel_module_name}.{path.stem}",
+                package=pkg_name,
             )
-            msg_index += UINT32_SIZE_IN_BYTES
-            color_image_height = from_bytes(
-                data=color_image_msg[
-                    msg_index:msg_index + UINT32_SIZE_IN_BYTES
-                ],
-                data_type="uint32",
-                endianness="<",
-            )
-            msg_index += UINT32_SIZE_IN_BYTES
-            color_image = []
-
-            for _ in range(color_image_width * color_image_height):
-                pixel = []
-                for _ in range(NUM_BYTES_PIXEL_COLOR_IMAGE):
-                    pixel.append(
-                        from_bytes(
-                            data=color_image_msg[msg_index:msg_index + BYTE_SIZE_IN_BYTES],  # noqa: E501
-                            data_type="byte",
-                            endianness="<",
-                        )
-                    )
-                    msg_index += BYTE_SIZE_IN_BYTES
-                color_image.append(tuple(pixel))
-
-            image = Image.new(
-                "RGB",
-                (color_image_width, color_image_height),
-            )
-            image.putdata(color_image)
-            image.save(snapshot_dir_path / "color_image.jpg")
+            for key, value in parser_module.__dict__.items():
+                if key.startswith("parse_") and inspect.isfunction(value):
+                    parsers[value.required_fields] = value
+                elif key.endswith("Parser") and inspect.isclass(value):
+                    obj = value()
+                    parsers[obj.required_fields] = obj.parse
 
         lock = threading.Lock()
 
@@ -262,7 +200,7 @@ def run_server(address: str, data_dir: str):
                 client=client,
                 data_dir=data_dir,
                 lock=lock,
-                parser=parser,
+                parsers=parsers,
                 thread_number=thread_number,
             )
             newthread.start()
