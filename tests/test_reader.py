@@ -1,5 +1,6 @@
 import struct
-from urllib.parse import urlunparse
+
+from furl import furl
 
 from project_pb2 import (
     ColorImage,
@@ -184,24 +185,18 @@ def protobuf_snapshot_list() -> bytes:
 def url(
     request,  # noqa: ANN001
     tmp_path,  # noqa: ANN001
-    netloc: str = "",
-    params: str = "",
-    query: str = "",
-    fragment: str = "",
 ) -> str:
     scheme, user_information, snapshot_list = request.param
     path = tmp_path / "sample.mind"
     with path.open(mode="wb") as file:
         file.write(user_information)
         file.write(snapshot_list)
-    return urlunparse(
-        components=(scheme, netloc, str(path), params, query, fragment)
-    )
+    return furl().set(scheme=scheme, path=str(path))
 
 
 @pytest.fixture
 def reader(url: str) -> Reader:
-    return Reader(url=url)
+    return Reader(url=str(url))
 
 
 def test_user_information(reader: Reader):

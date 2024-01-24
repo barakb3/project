@@ -1,7 +1,8 @@
 from typing import Callable, Union
-from urllib.parse import urlparse
 
 import click
+
+from furl import furl
 
 from .drivers import BinaryDriver, ProtobufDriver
 
@@ -17,10 +18,10 @@ class Reader:
 
     """
     def __init__(self, url: str) -> None:
-        parsed_url = urlparse(url=url)
+        parsed_url = furl(url=url)
         self.driver: Union[BinaryDriver, ProtobufDriver] = find_driver(
             scheme=parsed_url.scheme
-        )(parsed_url.path)
+        )(str(parsed_url.path))
         self.user_information = self.driver.get_user_information()
 
         print(
