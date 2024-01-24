@@ -1,3 +1,4 @@
+import gzip
 import io
 from collections import namedtuple
 
@@ -10,7 +11,10 @@ from ..utils import from_bytes
 
 class ProtobufDriver:
     def __init__(self, path: str):
-        self.file: io.BufferedReader = open(path, "rb")
+        if path.endswith(".gz"):
+            self.file: io.BufferedReader = gzip.open(path, "rb")
+        else:
+            self.file: io.BufferedReader = open(path, "rb")
 
     def get_user_information(self) -> tuple:
         size = from_bytes(

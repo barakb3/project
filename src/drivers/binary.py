@@ -1,3 +1,4 @@
+import gzip
 import io
 from collections import namedtuple
 
@@ -18,7 +19,10 @@ NUM_BYTES_PIXEL_COLOR_IMAGE = 3  # RGB format.
 
 class BinaryDriver:
     def __init__(self, path: str):
-        self.file: io.BufferedReader = open(path, "rb")
+        if path.endswith(".gz"):
+            self.file: io.BufferedReader = gzip.open(path, "rb")
+        else:
+            self.file: io.BufferedReader = open(path, "rb")
 
     def get_user_information(self) -> tuple:
         user_information = namedtuple(
