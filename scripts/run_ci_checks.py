@@ -8,7 +8,7 @@ def run_checks(platform: str):
         "flake8",
         "--suppress-none-returning",
         "--ignore",
-        "ANN101",
+        "ANN101,ANN102",
     ]
     if platform == "local":
         flake8_cmd.extend(["--exclude", ".env,.pytest_cache,project_pb2.py"])

@@ -8,7 +8,7 @@ from ..constants import (
     UINT32_SIZE_IN_BYTES,
     UINT64_SIZE_IN_BYTES,
 )
-from ..protocol import Snapshot
+from ..snapshot import Snapshot
 from ..utils import from_bytes
 
 NUM_BYTES_TIMESTAMP = UINT64_SIZE_IN_BYTES

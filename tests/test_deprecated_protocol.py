@@ -1,6 +1,6 @@
 import pytest
 
-from src.protocol import (
+from src.deprecated_protocol import (
     Config,
     EMPTY_COLOR_IMAGE,
     EMPTY_DEPTH_IMAGE,

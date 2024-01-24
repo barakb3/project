@@ -13,8 +13,8 @@ from project_pb2 import (
 
 import pytest
 
-from src.protocol import Snapshot
 from src.reader import Reader
+from src.snapshot import Snapshot
 
 from .test_utils import (
     COLOR_IMAGE_1,

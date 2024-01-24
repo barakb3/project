@@ -4,7 +4,7 @@ from collections import namedtuple
 from project_pb2 import ProtoSnapshot, ProtoUserInformation
 
 from ..constants import UINT32_SIZE_IN_BYTES
-from ..protocol import Snapshot
+from ..snapshot import Snapshot
 from ..utils import from_bytes
 
 
@@ -51,29 +51,4 @@ class ProtobufDriver:
         )
         parsed = ProtoSnapshot()
         parsed.ParseFromString(self.file.read(size))
-        return Snapshot(
-            timestamp=parsed.datetime,
-            translation=(
-                parsed.pose.translation.x,
-                parsed.pose.translation.y,
-                parsed.pose.translation.z,
-            ),
-            rotation=(
-                parsed.pose.rotation.x,
-                parsed.pose.rotation.y,
-                parsed.pose.rotation.z,
-                parsed.pose.rotation.w,
-            ),
-            color_image_width=parsed.color_image.width,
-            color_image_height=parsed.color_image.height,
-            color_image=parsed.color_image.data,
-            depth_image_width=parsed.depth_image.width,
-            depth_image_height=parsed.depth_image.height,
-            depth_image=tuple(parsed.depth_image.data),
-            feelings=(
-                parsed.feelings.hunger,
-                parsed.feelings.thirst,
-                parsed.feelings.exhaustion,
-                parsed.feelings.happiness,
-            ),
-        )
+        return Snapshot.from_parsed(parsed=parsed)
