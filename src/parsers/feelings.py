@@ -5,7 +5,21 @@ from ..server import Context
 from ..utils import from_bytes
 
 
-def parse_feelings(context: Context, feelings_msg: bytes):
+def parse_feelings(context: Context, feelings: tuple):
+    context.save(
+        file_rel_path="./feelings.json",
+        content=json.dumps(
+            {
+                "hunger": feelings[0],
+                "thirst": feelings[1],
+                "exhaustion": feelings[2],
+                "happiness": feelings[3],
+            }
+        )
+    )
+
+
+def deprecated_parse_feelings(context: Context, feelings_msg: bytes):
     feelings = []
     feelings_msg_index = 0
     for _ in range(4):

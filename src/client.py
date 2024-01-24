@@ -1,9 +1,9 @@
 import click
 
-from .constants import UINT32_SIZE_IN_BYTES
-from .protocol import Config, Hello, Snapshot
+import requests
+
 from .reader import Reader
-from .utils import Connection
+from .snapshot import Snapshot
 
 
 @click.command()
@@ -22,29 +22,24 @@ def run(address: str, url: str):
     ip, port = address.split(":", 1)
     reader = Reader(url=url)
 
-    hello_msg = Hello(
-        user_id=reader.user_information.id,
-        username=reader.user_information.username,
-        birthday=reader.user_information.birthday,
-        gender=reader.user_information.gender,
-    )
-    hello = hello_msg.serialize()
-
     for i, snapshot in enumerate(reader):
         snapshot: Snapshot
-        with Connection.connect(host=ip, port=int(port)) as connection:
-            connection: Connection
-            connection.send_message(msg=hello)
+        response_config = requests.get(f"http://{ip}:{port}/config")
+        supported_fields = tuple(response_config.json())
 
-            config_msg = connection.receive_message()
-            if len(config_msg) < UINT32_SIZE_IN_BYTES:
-                raise Exception("Incomplete meta data received.")
-            config: Config = Config.deserialize(msg=config_msg)
-            supported_fields = config.supported_fields
-
-            supported_snapshot = snapshot.clone_by_supported_fields(
-                supported_fields=supported_fields
-            )
-
-            connection.send_message(msg=supported_snapshot.serialize())
-        print(f"Client sent {i + 1} snapshots.")
+        supported_snapshot = snapshot.clone_by_supported_fields(
+            supported_fields=supported_fields
+        )
+        data = supported_snapshot.serialize(
+            user_information=reader.user_information
+        )
+        headers = {
+            "Content-Type": "application/octet-stream"
+        }
+        response_snapshot = requests.post(
+            f"http://{ip}:{port}/snapshot", data=data, headers=headers
+        )
+        print(
+            f"Client sent {i + 1} snapshots.\n"
+            f"Server response is {response_snapshot.text}"
+        )

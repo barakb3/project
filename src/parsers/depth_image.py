@@ -11,7 +11,24 @@ from ..utils import from_bytes
 matplotlib.use('Agg')
 
 
-def parse_depth_image(context: Context, depth_image_msg: bytes):
+def parse_depth_image(
+    context: Context,
+    depth_image_width: int,
+    depth_image_height: int,
+    depth_image: tuple,
+):
+    plt.imshow(
+        np.reshape(
+            np.array(depth_image),
+            newshape=(depth_image_height, depth_image_width),
+        )
+    )
+    plt.savefig(
+        context.path(file_rel_path="depth_image.png"), format="png"
+    )
+
+
+def deprecated_parse_depth_image(context: Context, depth_image_msg: bytes):
     msg_index = 0
     depth_image_width = from_bytes(
         data=depth_image_msg[
@@ -52,4 +69,6 @@ def parse_depth_image(context: Context, depth_image_msg: bytes):
     )
 
 
-parse_depth_image.required_fields = ("depth_image", )
+parse_depth_image.required_fields = (
+    "depth_image_width", "depth_image_height", "depth_image"
+)

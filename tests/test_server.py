@@ -33,7 +33,7 @@ def server_process() -> subprocess.Popen:
 def test_connection(server_process: subprocess.Popen):
     thread = threading.Thread(target=server_process.communicate)
     thread.start()
-    time.sleep(0.5)
+    time.sleep(3)
     try:
         connection = socket.socket()
         connection.connect(_SERVER_ADDRESS)
