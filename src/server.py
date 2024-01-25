@@ -37,20 +37,7 @@ class Context:
             f.write(content)
 
 
-@click.command()
-@click.argument("address")
-@click.argument("data_dir")
-def run_server(address: str, data_dir: str):
-    """
-    Runs a server that serves some data directory.
-    Can be stopped by `Ctrl+C`.
-
-    :param address: A host and a port, e.g.: 127.0.0.1:5000.
-    :type address: str
-    :param data_dir: A path to the data directory the server will serve.
-    :type data_dir: str ot Path-like objects
-
-    """
+def load_parsers() -> dict:
     package_name = __package__.split(".")[-1]
     root_pkg_abs_path = Path.cwd() / package_name
     parsers_rel_path = Path("./parsers")
@@ -72,6 +59,24 @@ def run_server(address: str, data_dir: str):
                 obj = value()
                 parsers[obj.required_fields] = obj.parse
 
+    return parsers
+
+
+@click.command()
+@click.argument("address")
+@click.argument("data_dir")
+def run_server(address: str, data_dir: str):
+    """
+    Runs a server that serves some data directory.
+    Can be stopped by `Ctrl+C`.
+
+    :param address: A host and a port, e.g.: 127.0.0.1:5000.
+    :type address: str
+    :param data_dir: A path to the data directory the server will serve.
+    :type data_dir: str ot Path-like objects
+
+    """
+    parsers = load_parsers()
     supported_fields = [
         parser for key in parsers.keys() for parser in key
     ]
