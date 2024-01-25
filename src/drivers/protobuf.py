@@ -9,6 +9,11 @@ from ..snapshot import Snapshot
 from ..utils import from_bytes
 
 
+UserInformation = namedtuple(
+    "user_information", ["id", "username", "birthday", "gender"]
+)
+
+
 class ProtobufDriver:
     def __init__(self, path: str):
         if path.endswith(".gz"):
@@ -24,9 +29,6 @@ class ProtobufDriver:
         )
         parsed = ProtoUserInformation()
         parsed.ParseFromString(self.file.read(size))
-        UserInformation = namedtuple(
-            "user_information", ["id", "username", "birthday", "gender"]
-        )
         if parsed.gender == ProtoUserInformation.Gender.MALE:
             gender = "m"
         elif parsed.gender == ProtoUserInformation.Gender.FEMALE:

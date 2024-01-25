@@ -66,7 +66,7 @@ class Snapshot:
             f"rotation={{'x': {self.rotation[0]}, 'y': {self.rotation[1]}, 'z': {self.rotation[2]}, 'w': {self.rotation[3]}}},\n"  # noqa: E501
             f"color_image=<{self.color_image_width}x{self.color_image_height}>,\n"  # noqa: E501
             f"depth_image=<{self.depth_image_width}x{self.depth_image_height}>,\n"  # noqa: E501
-            f"feelings={{'x': {self.feelings[0]}, 'y': {self.feelings[1]}, 'z': {self.feelings[2]}, 'w': {self.feelings[3]}}})"  # noqa: E501
+            f"feelings={{'hunger': {self.feelings[0]}, 'thirst': {self.feelings[1]}, 'exhaustion': {self.feelings[2]}, 'happiness': {self.feelings[3]}}})"  # noqa: E501
         )
 
     def __str__(self) -> str:
@@ -80,16 +80,43 @@ class Snapshot:
     def __eq__(self, other: "Snapshot") -> bool:
         if not isinstance(other, Snapshot):
             return NotImplemented
-        return self.timestamp == other.timestamp and \
-            self.translation == other.translation and \
-            self.rotation == other.rotation and \
-            self.color_image_width == other.color_image_width and \
-            self.color_image_height == other.color_image_height and \
-            self.color_image == other.color_image and \
-            self.depth_image_width == other.depth_image_width and \
-            self.depth_image_height == other.depth_image_height and \
-            self.depth_image == other.depth_image and \
+        equal_fields = [
+            self.timestamp == other.timestamp,
+            self.translation == other.translation,
+            self.rotation == other.rotation,
+            self.color_image_width == other.color_image_width,
+            self.color_image_height == other.color_image_height,
+            self.color_image == other.color_image,
+            self.depth_image_width == other.depth_image_width,
+            self.depth_image_height == other.depth_image_height,
+            self.depth_image == other.depth_image,
             self.feelings == other.feelings
+        ]
+        fields = [
+            "timestamp",
+            "translation",
+            "rotation",
+            "color_image_width",
+            "color_image_height",
+            "color_image",
+            "depth_image_width",
+            "depth_image_height",
+            "depth_image",
+            "feelings",
+        ]
+        if all(equal_fields):
+            return True
+        else:
+            unequal_fields = [
+                field for field, equal in zip(fields, equal_fields)
+                if not equal
+            ]
+            unequal_fields_description = ", ".join(unequal_fields)
+            print(
+                f"The following fields are not equal: "
+                f"{unequal_fields_description}"
+            )
+            return False
 
     def __getitem__(self, key: str):  # noqa: ANN204
         return getattr(self, key)
@@ -116,10 +143,10 @@ class Snapshot:
             depth_image_height=parsed.depth_image.height,
             depth_image=tuple(parsed.depth_image.data),
             feelings=(
-                parsed.feelings.hunger,
-                parsed.feelings.thirst,
-                parsed.feelings.exhaustion,
-                parsed.feelings.happiness,
+                round(parsed.feelings.hunger, 6),
+                round(parsed.feelings.thirst, 6),
+                round(parsed.feelings.exhaustion, 6),
+                round(parsed.feelings.happiness, 6),
             ),
         )
 
@@ -130,13 +157,13 @@ class Snapshot:
             gender = ProtoUserInformation.Gender.FEMALE
         elif user_information.gender == "o":
             gender = ProtoUserInformation.Gender.OTHER
-        user_information = ProtoUserInformation(
+        proto_user_information = ProtoUserInformation(
             user_id=user_information.id,
             username=user_information.username,
             birthday=user_information.birthday,
             gender=gender,
         )
-        snapshot = ProtoSnapshot(
+        proto_snapshot = ProtoSnapshot(
             datetime=self.timestamp,
             pose=Pose(
                 translation=Pose.Translation(
@@ -169,10 +196,10 @@ class Snapshot:
             ),
         )
         msg = bytearray()
-        msg += struct.pack("<I", user_information.ByteSize())
-        msg += user_information.SerializeToString()
-        msg += struct.pack("<I", snapshot.ByteSize())
-        msg += snapshot.SerializeToString()
+        msg += struct.pack("<I", proto_user_information.ByteSize())
+        msg += proto_user_information.SerializeToString()
+        msg += struct.pack("<I", proto_snapshot.ByteSize())
+        msg += proto_snapshot.SerializeToString()
         return msg
 
     def clone_by_supported_fields(self, supported_fields: tuple) -> "Snapshot":

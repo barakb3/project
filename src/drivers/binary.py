@@ -2,6 +2,7 @@ import gzip
 import io
 from collections import namedtuple
 
+from .protobuf import UserInformation
 from ..constants import (
     CHAR_SIZE_IN_BYTES,
     DOUBLE_SIZE_IN_BYTES,
@@ -25,10 +26,7 @@ class BinaryDriver:
             self.file: io.BufferedReader = open(path, "rb")
 
     def get_user_information(self) -> tuple:
-        user_information = namedtuple(
-            "user_information", ["id", "username", "birthday", "gender"]
-        )
-        user_information.id: int = from_bytes(
+        id: int = from_bytes(
             data=self.file.read(UINT64_SIZE_IN_BYTES),
             data_type="uint64",
             endianness="<",
@@ -38,22 +36,24 @@ class BinaryDriver:
             data_type="uint32",
             endianness="<",
         )
-        user_information.username: str = from_bytes(
+        username: str = from_bytes(
             data=self.file.read(name_length),
             data_type="string",
             endianness="<",
         )
-        user_information.birthday: int = from_bytes(
+        birthday: int = from_bytes(
             data=self.file.read(UINT32_SIZE_IN_BYTES),
             data_type="uint32",
             endianness="<",
         )
-        user_information.gender: str = from_bytes(
+        gender: str = from_bytes(
             data=self.file.read(CHAR_SIZE_IN_BYTES),
             data_type="char",
             endianness="<",
         )
-        return user_information
+        return UserInformation(
+            id=id, username=username, birthday=birthday, gender=gender
+        )
 
     def get_snapshot(self) -> Snapshot:
         binary_timestamp = self.file.read(NUM_BYTES_TIMESTAMP)
