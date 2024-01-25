@@ -22,6 +22,9 @@ class ImageColorParser:
         color_image_height: int,
         color_image: bytes,
     ):
+        if color_image == b"":
+            return
+
         index = 0
         color_image_list = []
         for _ in range(color_image_width * color_image_height):

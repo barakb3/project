@@ -17,6 +17,9 @@ def parse_depth_image(
     depth_image_height: int,
     depth_image: tuple,
 ):
+    if depth_image == tuple():
+        return
+
     plt.imshow(
         np.reshape(
             np.array(depth_image),
