@@ -1,9 +1,9 @@
 import click
 
-from src.client import run
-from src.reader import read
-from src.server import run_server
-from src.web import run_webserver
+from .client import run
+from .reader import read
+from .server import run_server
+from .web import run_webserver
 
 
 @click.group()

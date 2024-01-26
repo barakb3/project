@@ -1,168 +1,66 @@
 import datetime as dt
-import functools
-import json
-import threading
+import importlib
+import inspect
 from pathlib import Path
-from typing import Callable
-
-from PIL import Image
 
 import click
 
-from .constants import (
-    BYTE_SIZE_IN_BYTES,
-    DOUBLE_SIZE_IN_BYTES,
-    UINT32_SIZE_IN_BYTES,
-    UINT64_SIZE_IN_BYTES,
-)
-from .protocol import (
-    Config,
-    Hello,
-    NUM_BYTES_FEELINGS,
-    NUM_BYTES_PIXEL_COLOR_IMAGE,
-    NUM_BYTES_PIXEL_DEPTH_IMAGE,
-    NUM_BYTES_ROTATION,
-    NUM_BYTES_TRANSLATION,
-    Snapshot,
-    from_bytes,
-)
-from .utils import Connection, Listener
+import flask
+
+from project_pb2 import ProtoSnapshot, ProtoUserInformation
+
+from .constants import UINT32_SIZE_IN_BYTES
+from .snapshot import Snapshot
+from .utils import from_bytes
 
 
-class Parser:
-    def __init__(self):
-        self.parsers: dict = {}
-
-    def add_parser(self, name: str) -> Callable:
-        def decorator(f: Callable) -> Callable:
-            @functools.wraps(f)
-            def wrapper(*args, **kwargs):  # noqa: ANN002, ANN003, ANN201
-                return f(*args, **kwargs)
-            self.parsers[name] = f
-            return wrapper
-        return decorator
-
-
-class Handler(threading.Thread):
-    def __init__(
-            self,
-            client: Connection,
-            data_dir: str,
-            lock: threading.Lock,
-            parser: Parser,
-            thread_number: int,
-    ):
-        super().__init__()
-        self.client = client
-        self.data_dir_path = Path(data_dir)
-        self.lock = lock
-        self.parser = parser
-        self.thread_number = thread_number
-
-    def run(self):
-        hello_msg = self.client.receive_message()
-        if len(hello_msg) < UINT32_SIZE_IN_BYTES:
-            raise Exception("Incomplete meta data received.")
-        user_id = Hello.deserialize(msg=hello_msg).user_id
-
-        config = Config(supported_fields=tuple(self.parser.parsers.keys()))
-        self.client.send_message(msg=config.serialize())
-
-        snapshot_msg = self.client.receive_message()
-        if len(snapshot_msg) < UINT32_SIZE_IN_BYTES:
-            raise Exception("Incomplete meta data received.")
-
-        self.lock.acquire()
-        self.process_snapshot(snapshot_msg=snapshot_msg, user_id=user_id)
-        self.lock.release()
-
-        self.client.close()
-        print(f"Server processed {self.thread_number} snapshots.")
-
-    def process_snapshot(self, snapshot_msg: bytes, user_id: int):
-        msg_index = 0
-        timestamp = from_bytes(
-            data=snapshot_msg[msg_index:msg_index + UINT64_SIZE_IN_BYTES],
-            data_type="uint64",
-            endianness="<",
-        )
-        msg_index += UINT64_SIZE_IN_BYTES
-
-        datetime = dt.datetime.fromtimestamp(
+class Context:
+    def __init__(self, user_id: int, data_dir_path: str, timestamp: int):
+        self.user_id = user_id
+        self.data_dir_path = data_dir_path
+        self.datetime = dt.datetime.fromtimestamp(
             timestamp / 1000, tz=dt.timezone.utc  # Timestamp in milliseconds.
         )
-        snapshot_dir_path = self.data_dir_path / \
-            f"{user_id}" / \
-            f"{datetime:%Y-%m-%d_%H-%M-%S-%f}"
-        snapshot_dir_path.mkdir(parents=True, exist_ok=True)
-
-        preprocessed_data = {}
-
-        preprocessed_data["translation"] = snapshot_msg[
-            msg_index:msg_index + NUM_BYTES_TRANSLATION
-        ]
-        msg_index += NUM_BYTES_TRANSLATION
-
-        preprocessed_data["rotation"] = snapshot_msg[
-            msg_index:msg_index + NUM_BYTES_ROTATION
-        ]
-        msg_index += NUM_BYTES_ROTATION
-
-        start_color_image = msg_index
-        color_image_width = from_bytes(
-            data=snapshot_msg[msg_index:msg_index + UINT32_SIZE_IN_BYTES],
-            data_type="uint32",
-            endianness="<",
+        self.snapshot_dir_path = Path(
+            self.data_dir_path,
+            f"{self.user_id}",
+            f"{self.datetime:%Y-%m-%d_%H-%M-%S-%f}",
         )
-        msg_index += UINT32_SIZE_IN_BYTES
-        color_image_height = from_bytes(
-            data=snapshot_msg[msg_index:msg_index + UINT32_SIZE_IN_BYTES],
-            data_type="uint32",
-            endianness="<",
-        )
-        msg_index += UINT32_SIZE_IN_BYTES
-        # Add image bytes.
-        msg_index += (
-            NUM_BYTES_PIXEL_COLOR_IMAGE * color_image_width * color_image_height  # noqa: E501
-        )
-        end_color_image = msg_index
-        preprocessed_data["color_image"] = snapshot_msg[
-            start_color_image:end_color_image
-        ]
 
-        start_depth_image = msg_index
-        depth_image_width = from_bytes(
-            data=snapshot_msg[msg_index:msg_index + UINT32_SIZE_IN_BYTES],
-            data_type="uint32",
-            endianness="<",
-        )
-        msg_index += UINT32_SIZE_IN_BYTES
-        depth_image_height = from_bytes(
-            data=snapshot_msg[msg_index:msg_index + UINT32_SIZE_IN_BYTES],
-            data_type="uint32",
-            endianness="<",
-        )
-        msg_index += UINT32_SIZE_IN_BYTES
-        # Add image bytes.
-        msg_index += (
-            NUM_BYTES_PIXEL_DEPTH_IMAGE * depth_image_width * depth_image_height  # noqa: E501
-        )
-        end_depth_image = msg_index
-        preprocessed_data["depth_image"] = snapshot_msg[
-            start_depth_image:end_depth_image
-        ]
+    def path(self, rel_path: str) -> Path:
+        # `rel_path` is relative to the snapshot's directory path.
+        path = self.snapshot_dir_path / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return path
 
-        preprocessed_data["feelings"] = snapshot_msg[
-            msg_index:msg_index + NUM_BYTES_FEELINGS
-        ]
-        msg_index += NUM_BYTES_FEELINGS
+    def save(self, file_rel_path: str, content: str):
+        with open(self.path(rel_path=file_rel_path), "w") as f:
+            f.write(content)
 
-        for field_name, parser in self.parser.parsers.items():
-            parser(snapshot_dir_path, preprocessed_data[field_name])
 
-        assert (
-            msg_index == len(snapshot_msg)
-        ), "Message length received doesn't match."
+def load_parsers() -> dict:
+    package_name = __package__.split(".")[-1]
+    root_pkg_abs_path = Path.cwd() / package_name
+    parsers_rel_path = Path("./parsers")
+
+    parsers: dict = {}
+    for path in Path(root_pkg_abs_path, parsers_rel_path).iterdir():
+        if path.name.startswith("_") or not path.suffix == ".py":
+            continue
+        pkg_name = str(root_pkg_abs_path).split("/")[-1]
+        rel_module_name = "." + ".".join(parsers_rel_path.parts)
+        parser_module = importlib.import_module(
+            f"{rel_module_name}.{path.stem}",
+            package=pkg_name,
+        )
+        for key, value in parser_module.__dict__.items():
+            if key.startswith("parse_") and inspect.isfunction(value):
+                parsers[value.required_fields] = value
+            elif key.endswith("Parser") and inspect.isclass(value):
+                obj = value()
+                parsers[obj.required_fields] = obj.parse
+
+    return parsers
 
 
 @click.command()
@@ -179,90 +77,77 @@ def run_server(address: str, data_dir: str):
     :type data_dir: str ot Path-like objects
 
     """
+    parsers = load_parsers()
+    supported_fields = [
+        parser for key in parsers.keys() for parser in key
+    ]
+
+    app = flask.Flask(__name__)
+
+    @app.route("/config", methods=["GET"])
+    def send_config():  # noqa: ANN201
+        try:
+            return supported_fields
+        except Exception as err:
+            return flask.jsonify(
+                {"status": 1, "error": str(err)}
+            )
+
+    @app.route("/snapshot", methods=["POST"])
+    def process_snapshot():  # noqa: ANN201
+        try:
+            response = flask.request
+            data = response.get_data()
+
+            msg_index = 0
+            user_information_size = from_bytes(
+                data=data[0:UINT32_SIZE_IN_BYTES],
+                data_type="uint32",
+                endianness="<",
+            )
+            msg_index += UINT32_SIZE_IN_BYTES
+
+            parsed_user_information = ProtoUserInformation()
+            parsed_user_information.ParseFromString(
+                data[msg_index:msg_index + user_information_size]
+            )
+            msg_index += user_information_size
+
+            snapshot_size = from_bytes(
+                data=data[msg_index:msg_index + UINT32_SIZE_IN_BYTES],
+                data_type="uint32",
+                endianness="<",
+            )
+            msg_index += UINT32_SIZE_IN_BYTES
+
+            parsed_snapshot = ProtoSnapshot()
+            parsed_snapshot.ParseFromString(
+                data[msg_index:msg_index + snapshot_size]
+            )
+            msg_index += snapshot_size
+
+            assert (
+                msg_index == len(data)
+            ), "Message length received doesn't match."
+
+            snapshot = Snapshot.from_parsed(parsed=parsed_snapshot)
+
+            context = Context(
+                user_id=parsed_user_information.user_id,
+                data_dir_path=data_dir,
+                timestamp=parsed_snapshot.datetime
+            )
+            for required_fields, parser in parsers.items():
+                args = [
+                    snapshot[field] for field in required_fields
+                    if field in supported_fields
+                ]
+                parser(context, *args)
+
+            print("Server processed another snapshots.")
+            return {"status": "success"}
+        except Exception as err:
+            return {"status_code": "failure", "error": str(err)}
+
     ip, port = address.split(":", 1)
-    with Listener(port=int(port), host=ip) as listener:
-        parser = Parser()
-
-        @parser.add_parser("translation")
-        def parse_translation(snapshot_dir_path: Path, translation_msg: bytes):
-            translation = []
-            msg_index = 0
-            for _ in range(3):
-                translation.append(
-                    from_bytes(
-                        data=translation_msg[
-                            msg_index:msg_index + DOUBLE_SIZE_IN_BYTES
-                        ],
-                        data_type="double",
-                        endianness="<",
-                    )
-                )
-                msg_index += DOUBLE_SIZE_IN_BYTES
-
-            with open(snapshot_dir_path / "translation.json", "w") as writer:
-                json.dump(
-                    {
-                        "x": translation[0],
-                        "y": translation[1],
-                        "z": translation[2],
-                    },
-                    writer
-                )
-
-        @parser.add_parser("color_image")
-        def parse_color_image(
-            snapshot_dir_path: Path, color_image_msg: Snapshot
-        ):
-            msg_index = 0
-            color_image_width = from_bytes(
-                data=color_image_msg[
-                    msg_index:msg_index + UINT32_SIZE_IN_BYTES
-                ],
-                data_type="uint32",
-                endianness="<",
-            )
-            msg_index += UINT32_SIZE_IN_BYTES
-            color_image_height = from_bytes(
-                data=color_image_msg[
-                    msg_index:msg_index + UINT32_SIZE_IN_BYTES
-                ],
-                data_type="uint32",
-                endianness="<",
-            )
-            msg_index += UINT32_SIZE_IN_BYTES
-            color_image = []
-
-            for _ in range(color_image_width * color_image_height):
-                pixel = []
-                for _ in range(NUM_BYTES_PIXEL_COLOR_IMAGE):
-                    pixel.append(
-                        from_bytes(
-                            data=color_image_msg[msg_index:msg_index + BYTE_SIZE_IN_BYTES],  # noqa: E501
-                            data_type="byte",
-                            endianness="<",
-                        )
-                    )
-                    msg_index += BYTE_SIZE_IN_BYTES
-                color_image.append(tuple(pixel))
-
-            image = Image.new(
-                "RGB",
-                (color_image_width, color_image_height),
-            )
-            image.putdata(color_image)
-            image.save(snapshot_dir_path / "color_image.jpg")
-
-        lock = threading.Lock()
-
-        thread_number = 1
-        while True:
-            client = listener.accept()
-            newthread = Handler(
-                client=client,
-                data_dir=data_dir,
-                lock=lock,
-                parser=parser,
-                thread_number=thread_number,
-            )
-            newthread.start()
-            thread_number += 1
+    app.run(host=ip, port=port)

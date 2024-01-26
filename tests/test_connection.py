@@ -72,14 +72,14 @@ def test_connect(server: socket.socket):
         server.accept()
 
 
-def test_send_message(mock_socket: MockSocket):
+def test_send_message(mock_socket):  # noqa: ANN001
     conn: MockSocket = socket.socket()
     connection = Connection(conn=conn)
     connection.send_message(msg=MSG)
     assert conn.get_data_sent() == SIZE_PREFIXED_MSG
 
 
-def test_receive_message(mock_socket: MockSocket):
+def test_receive_message(mock_socket):  # noqa: ANN001
     conn: MockSocket = socket.socket(data_sent=SIZE_PREFIXED_MSG)
     connection = Connection(conn=conn)
     assert connection.receive_message() == MSG
