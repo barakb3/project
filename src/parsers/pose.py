@@ -6,7 +6,6 @@ from ..utils import from_bytes
 
 
 def parse_pose(context: Context, translation: tuple, rotation: tuple):
-    context.path("./pose/").mkdir(parents=True, exist_ok=True)
     context.save(
         file_rel_path="./pose/translation.json",
         content=json.dumps(
@@ -33,8 +32,6 @@ def parse_pose(context: Context, translation: tuple, rotation: tuple):
 def deprecated_parse_pose(
     context: Context, translation_msg: bytes, rotation_msg: bytes
 ):
-    context.path("./pose/").mkdir(parents=True, exist_ok=True)
-
     translation = []
     translation_msg_index = 0
     for _ in range(3):

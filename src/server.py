@@ -26,14 +26,15 @@ class Context:
             f"{self.user_id}",
             f"{self.datetime:%Y-%m-%d_%H-%M-%S-%f}",
         )
-        self.snapshot_dir_path.mkdir(parents=True, exist_ok=True)
 
-    def path(self, file_rel_path: str) -> Path:
-        return self.snapshot_dir_path / file_rel_path
+    def path(self, rel_path: str) -> Path:
+        # `rel_path` is relative to the snapshot's directory path.
+        path = self.snapshot_dir_path / rel_path
+        path.parent.mkdir(parents=True, exist_ok=True)
+        return path
 
     def save(self, file_rel_path: str, content: str):
-        # `file_rel_path` is relative to the snapshot's directory path.
-        with open(self.path(file_rel_path=file_rel_path), "w") as f:
+        with open(self.path(rel_path=file_rel_path), "w") as f:
             f.write(content)
 
 
