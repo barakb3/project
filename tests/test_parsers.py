@@ -8,8 +8,7 @@ import pytest
 from src import parsers
 from src.server import Context
 
-USER_ID = 3
-TIMESTAMP = 1000
+from .test_utils import TIMESTAMP, USER_ID
 
 
 @pytest.fixture

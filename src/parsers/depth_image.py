@@ -27,7 +27,7 @@ def parse_depth_image(
         )
     )
     plt.savefig(
-        context.path(file_rel_path="depth_image.png"), format="png"
+        context.path(rel_path="depth_image.png"), format="png"
     )
 
 
