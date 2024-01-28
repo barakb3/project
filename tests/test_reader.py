@@ -63,45 +63,47 @@ def protobuf_user_information() -> bytes:
         birthday=BIRTHDAY,
         gender=0,
     )
-    msg = bytearray()
-    msg += struct.pack("<I", user_information.ByteSize())
-    msg += user_information.SerializeToString()
-    return msg
+    return b"".join(
+        [
+            struct.pack("<I", user_information.ByteSize()),
+            user_information.SerializeToString(),
+        ]
+    )
 
 
 def binary_snapshot_list() -> bytes:
-    snapshot_list = bytearray()
-    snapshot_list += struct.pack("<Q", TIMESTAMP_1)
+    snapshot_list = []
+    snapshot_list.append(struct.pack("<Q", TIMESTAMP_1))
     for coor in TRANSLATION_1:
-        snapshot_list += struct.pack("<d", coor)
+        snapshot_list.append(struct.pack("<d", coor))
     for coor in ROTATION_1:
-        snapshot_list += struct.pack("<d", coor)
-    snapshot_list += struct.pack("<I", COLOR_IMAGE_HEIGHT_1)
-    snapshot_list += struct.pack("<I", COLOR_IMAGE_WIDTH_1)
-    snapshot_list += COLOR_IMAGE_1
-    snapshot_list += struct.pack("<I", DEPTH_IMAGE_HEIGHT_1)
-    snapshot_list += struct.pack("<I", DEPTH_IMAGE_WIDTH_1)
+        snapshot_list.append(struct.pack("<d", coor))
+    snapshot_list.append(struct.pack("<I", COLOR_IMAGE_HEIGHT_1))
+    snapshot_list.append(struct.pack("<I", COLOR_IMAGE_WIDTH_1))
+    snapshot_list.append(COLOR_IMAGE_1)
+    snapshot_list.append(struct.pack("<I", DEPTH_IMAGE_HEIGHT_1))
+    snapshot_list.append(struct.pack("<I", DEPTH_IMAGE_WIDTH_1))
     for pixel in DEPTH_IMAGE_1:
-        snapshot_list += struct.pack("<f", pixel)
+        snapshot_list.append(struct.pack("<f", pixel))
     for feeling in FEELINGS_1:
-        snapshot_list += struct.pack("<f", feeling)
+        snapshot_list.append(struct.pack("<f", feeling))
 
-    snapshot_list += struct.pack("<Q", TIMESTAMP_2)
+    snapshot_list.append(struct.pack("<Q", TIMESTAMP_2))
     for coor in TRANSLATION_2:
-        snapshot_list += struct.pack("<d", coor)
+        snapshot_list.append(struct.pack("<d", coor))
     for coor in ROTATION_2:
-        snapshot_list += struct.pack("<d", coor)
-    snapshot_list += struct.pack("<I", COLOR_IMAGE_HEIGHT_2)
-    snapshot_list += struct.pack("<I", COLOR_IMAGE_WIDTH_2)
-    snapshot_list += COLOR_IMAGE_2
-    snapshot_list += struct.pack("<I", DEPTH_IMAGE_HEIGHT_2)
-    snapshot_list += struct.pack("<I", DEPTH_IMAGE_WIDTH_2)
+        snapshot_list.append(struct.pack("<d", coor))
+    snapshot_list.append(struct.pack("<I", COLOR_IMAGE_HEIGHT_2))
+    snapshot_list.append(struct.pack("<I", COLOR_IMAGE_WIDTH_2))
+    snapshot_list.append(COLOR_IMAGE_2)
+    snapshot_list.append(struct.pack("<I", DEPTH_IMAGE_HEIGHT_2))
+    snapshot_list.append(struct.pack("<I", DEPTH_IMAGE_WIDTH_2))
     for pixel in DEPTH_IMAGE_2:
-        snapshot_list += struct.pack("<f", pixel)
+        snapshot_list.append(struct.pack("<f", pixel))
     for feeling in FEELINGS_2:
-        snapshot_list += struct.pack("<f", feeling)
+        snapshot_list.append(struct.pack("<f", feeling))
 
-    return snapshot_list
+    return b"".join(snapshot_list)
 
 
 def protobuf_snapshot_list() -> bytes:
@@ -170,12 +172,12 @@ def protobuf_snapshot_list() -> bytes:
             happiness=FEELINGS_2[3],
         ),
     )
-    msg = bytearray()
-    msg += struct.pack("<I", snapshot_1.ByteSize())
-    msg += snapshot_1.SerializeToString()
-    msg += struct.pack("<I", snapshot_2.ByteSize())
-    msg += snapshot_2.SerializeToString()
-    return msg
+    msg = []
+    msg.append(struct.pack("<I", snapshot_1.ByteSize()))
+    msg.append(snapshot_1.SerializeToString())
+    msg.append(struct.pack("<I", snapshot_2.ByteSize()))
+    msg.append(snapshot_2.SerializeToString())
+    return b"".join(msg)
 
 
 @pytest.fixture(params=[

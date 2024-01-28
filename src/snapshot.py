@@ -195,12 +195,14 @@ class Snapshot:
                 happiness=self.feelings[3],
             ),
         )
-        msg = bytearray()
-        msg += struct.pack("<I", proto_user_information.ByteSize())
-        msg += proto_user_information.SerializeToString()
-        msg += struct.pack("<I", proto_snapshot.ByteSize())
-        msg += proto_snapshot.SerializeToString()
-        return msg
+        return b"".join(
+            [
+                struct.pack("<I", proto_user_information.ByteSize()),
+                proto_user_information.SerializeToString(),
+                struct.pack("<I", proto_snapshot.ByteSize()),
+                proto_snapshot.SerializeToString(),
+            ]
+        )
 
     def clone_by_supported_fields(self, supported_fields: tuple) -> "Snapshot":
         if "translation" in supported_fields:

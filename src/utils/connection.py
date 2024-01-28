@@ -33,10 +33,11 @@ class Connection:
             data_type="uint32",
             endianness="<",
         )
-        msg = bytearray()
+        msg = []
         for _ in range(0, msg_length, CHUNK_SIZE_IN_BYTES):
-            msg += self.conn.recv(CHUNK_SIZE_IN_BYTES)
+            msg.append(self.conn.recv(CHUNK_SIZE_IN_BYTES))
 
+        msg = b"".join(msg)
         if len(msg) < msg_length:
             # Wait one second and try last time to receive all data.
             time.sleep(1)
