@@ -185,13 +185,13 @@ def test_serialize(
         birthday=user_information.birthday,
         gender=gender,
     )
-    msg = bytearray()
-    msg += struct.pack("<I", proto_user_information.ByteSize())
-    msg += proto_user_information.SerializeToString()
-    msg += struct.pack("<I", proto_snapshot.ByteSize())
-    msg += proto_snapshot.SerializeToString()
+    msg = []
+    msg.append(struct.pack("<I", proto_user_information.ByteSize()))
+    msg.append(proto_user_information.SerializeToString())
+    msg.append(struct.pack("<I", proto_snapshot.ByteSize()))
+    msg.append(proto_snapshot.SerializeToString())
     assert (
-        snapshot.serialize(user_information=user_information) == msg
+        snapshot.serialize(user_information=user_information) == b"".join(msg)
     )
 
 
