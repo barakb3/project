@@ -11,6 +11,7 @@ from project_pb2 import ProtoSnapshot, ProtoUserInformation
 
 from .constants import UINT32_SIZE_IN_BYTES
 from .snapshot import Snapshot
+from .user_information import UserInformation
 from .utils import from_bytes
 
 
@@ -63,6 +64,89 @@ def load_parsers() -> dict:
     return parsers
 
 
+class Server:
+    def __init__(self, host: str, port: int, data_dir_path: str):
+        self.host = host
+        self.port = port
+        self.app = flask.Flask(__name__)
+
+        self.data_dir_path = data_dir_path
+        self.parsers = load_parsers()
+        self.supported_fields = [
+            parser for key in self.parsers.keys() for parser in key
+        ]
+
+        self.parsed_snapshots = 0
+
+        @self.app.route("/config", methods=["GET"])
+        def config():  # noqa: ANN201
+            return self.supported_fields
+
+        @self.app.route("/snapshot", methods=["POST"])
+        def snapshot():  # noqa: ANN201
+            response = flask.request
+            user_information, snapshot = self.get_user_id_and_snapshot(
+                data=response.get_data()
+            )
+            context = Context(
+                user_id=user_information.id,
+                data_dir_path=self.data_dir_path,
+                timestamp=snapshot.timestamp
+            )
+            for required_fields, parser in self.parsers.items():
+                args = [
+                    snapshot[field] for field in required_fields
+                    if field in self.supported_fields
+                ]
+                parser(context, *args)
+
+            self.parsed_snapshots += 1
+            print(f"Server processed {self.parsed_snapshots} snapshots.")
+            return {"status": "success"}
+
+    def get_user_id_and_snapshot(self, data: bytes) -> tuple:
+        msg_index = 0
+        user_information_size = from_bytes(
+            data=data[0:UINT32_SIZE_IN_BYTES],
+            data_type="uint32",
+            endianness="<",
+        )
+        msg_index += UINT32_SIZE_IN_BYTES
+
+        parsed_user_information = ProtoUserInformation()
+        parsed_user_information.ParseFromString(
+            data[msg_index:msg_index + user_information_size]
+        )
+        msg_index += user_information_size
+        user_information = UserInformation.from_parsed(
+            parsed=parsed_user_information
+        )
+
+        snapshot_size = from_bytes(
+            data=data[msg_index:msg_index + UINT32_SIZE_IN_BYTES],
+            data_type="uint32",
+            endianness="<",
+        )
+        msg_index += UINT32_SIZE_IN_BYTES
+
+        parsed_snapshot = ProtoSnapshot()
+        parsed_snapshot.ParseFromString(
+            data[msg_index:msg_index + snapshot_size]
+        )
+        msg_index += snapshot_size
+
+        assert (
+            msg_index == len(data)
+        ), "Message length received doesn't match."
+
+        snapshot = Snapshot.from_parsed(parsed=parsed_snapshot)
+
+        return (user_information, snapshot)
+
+    def run(self):
+        self.app.run(host=self.host, port=self.port)
+
+
 @click.command()
 @click.argument("address")
 @click.argument("data_dir")
@@ -77,77 +161,6 @@ def run_server(address: str, data_dir: str):
     :type data_dir: str ot Path-like objects
 
     """
-    parsers = load_parsers()
-    supported_fields = [
-        parser for key in parsers.keys() for parser in key
-    ]
-
-    app = flask.Flask(__name__)
-
-    @app.route("/config", methods=["GET"])
-    def send_config():  # noqa: ANN201
-        try:
-            return supported_fields
-        except Exception as err:
-            return flask.jsonify(
-                {"status": 1, "error": str(err)}
-            )
-
-    @app.route("/snapshot", methods=["POST"])
-    def process_snapshot():  # noqa: ANN201
-        try:
-            response = flask.request
-            data = response.get_data()
-
-            msg_index = 0
-            user_information_size = from_bytes(
-                data=data[0:UINT32_SIZE_IN_BYTES],
-                data_type="uint32",
-                endianness="<",
-            )
-            msg_index += UINT32_SIZE_IN_BYTES
-
-            parsed_user_information = ProtoUserInformation()
-            parsed_user_information.ParseFromString(
-                data[msg_index:msg_index + user_information_size]
-            )
-            msg_index += user_information_size
-
-            snapshot_size = from_bytes(
-                data=data[msg_index:msg_index + UINT32_SIZE_IN_BYTES],
-                data_type="uint32",
-                endianness="<",
-            )
-            msg_index += UINT32_SIZE_IN_BYTES
-
-            parsed_snapshot = ProtoSnapshot()
-            parsed_snapshot.ParseFromString(
-                data[msg_index:msg_index + snapshot_size]
-            )
-            msg_index += snapshot_size
-
-            assert (
-                msg_index == len(data)
-            ), "Message length received doesn't match."
-
-            snapshot = Snapshot.from_parsed(parsed=parsed_snapshot)
-
-            context = Context(
-                user_id=parsed_user_information.user_id,
-                data_dir_path=data_dir,
-                timestamp=parsed_snapshot.datetime
-            )
-            for required_fields, parser in parsers.items():
-                args = [
-                    snapshot[field] for field in required_fields
-                    if field in supported_fields
-                ]
-                parser(context, *args)
-
-            print("Server processed another snapshots.")
-            return {"status": "success"}
-        except Exception as err:
-            return {"status_code": "failure", "error": str(err)}
-
     ip, port = address.split(":", 1)
-    app.run(host=ip, port=port)
+    server = Server(host=ip, port=port, data_dir_path=data_dir)
+    server.run()

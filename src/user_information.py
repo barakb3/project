@@ -23,7 +23,7 @@ class UserInformation:
             gender = "o"
 
         return cls(
-            id=parsed.id,
+            id=parsed.user_id,
             username=parsed.username,
             birthday=parsed.birthday,
             gender=gender

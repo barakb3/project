@@ -32,7 +32,7 @@ def run(address: str, url: str):
         )
         user_information_to_send = reader.user_information.serialize()
         snapshot_to_send = supported_snapshot.serialize()
-        data = b"".join(user_information_to_send, snapshot_to_send)
+        data = b"".join([user_information_to_send, snapshot_to_send])
         headers = {
             "Content-Type": "application/octet-stream"
         }
