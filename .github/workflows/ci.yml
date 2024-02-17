@@ -1,0 +1,39 @@
+name: CI
+
+on: [push]
+
+env:
+  PYTHONPATH: "${PYTHONPATH}:./:../"
+
+jobs:
+  style-guide:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install linter
+        run: |
+          pip install flake8==6.1.0
+          pip install flake8-annotations==3.0.1
+          pip install flake8-import-order==0.18.2
+
+      - name: Run linter
+        run: flake8 --suppress-none-returning --ignore ANN101,ANN102 --exclude project_pb2.py
+
+  run-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install requirements
+        run: pip install -r requirements.txt
+
+      - name: Run tests
+        run: pytest --cov --cov-report=xml
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV }}
