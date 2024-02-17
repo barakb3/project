@@ -7,12 +7,10 @@ from project_pb2 import (
     Feelings,
     Pose,
     ProtoSnapshot,
-    ProtoUserInformation,
 )
 
 import pytest
 
-from src.drivers.protobuf import UserInformation
 from src.snapshot import (
     EMPTY_COLOR_IMAGE,
     EMPTY_DEPTH_IMAGE,
@@ -163,35 +161,12 @@ def test_getitem(snapshot: Snapshot):
     assert snapshot["timestamp"] == TIMESTAMP_1
 
 
-@pytest.mark.parametrize("gender", ["m", "f", "o"])
-def test_serialize(
-    snapshot: Snapshot, proto_snapshot: ProtoSnapshot, gender: str
-):
-    user_information = UserInformation(
-        id=ID,
-        username=NAME,
-        birthday=BIRTHDAY,
-        gender=gender,
-    )
-    if user_information.gender == "m":
-        gender = ProtoUserInformation.Gender.MALE
-    elif user_information.gender == "f":
-        gender = ProtoUserInformation.Gender.FEMALE
-    elif user_information.gender == "o":
-        gender = ProtoUserInformation.Gender.OTHER
-    proto_user_information = ProtoUserInformation(
-        user_id=user_information.id,
-        username=user_information.username,
-        birthday=user_information.birthday,
-        gender=gender,
-    )
-    msg = []
-    msg.append(struct.pack("<I", proto_user_information.ByteSize()))
-    msg.append(proto_user_information.SerializeToString())
-    msg.append(struct.pack("<I", proto_snapshot.ByteSize()))
-    msg.append(proto_snapshot.SerializeToString())
+def test_serialize(snapshot: Snapshot, proto_snapshot: ProtoSnapshot):
+    serialized = []
+    serialized.append(struct.pack("<I", proto_snapshot.ByteSize()))
+    serialized.append(proto_snapshot.SerializeToString())
     assert (
-        snapshot.serialize(user_information=user_information) == b"".join(msg)
+        snapshot.serialize() == b"".join(serialized)
     )
 
 

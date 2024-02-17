@@ -1,17 +1,12 @@
 import gzip
 import io
-from collections import namedtuple
 
 from project_pb2 import ProtoSnapshot, ProtoUserInformation
 
 from ..constants import UINT32_SIZE_IN_BYTES
 from ..snapshot import Snapshot
+from ..user_information import UserInformation
 from ..utils import from_bytes
-
-
-UserInformation = namedtuple(
-    "user_information", ["id", "username", "birthday", "gender"]
-)
 
 
 class ProtobufDriver:
@@ -21,7 +16,7 @@ class ProtobufDriver:
         else:
             self.file: io.BufferedReader = open(path, "rb")
 
-    def get_user_information(self) -> tuple:
+    def get_user_information(self) -> UserInformation:
         size = from_bytes(
             data=self.file.read(UINT32_SIZE_IN_BYTES),
             data_type="uint32",

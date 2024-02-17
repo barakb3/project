@@ -30,9 +30,9 @@ def run(address: str, url: str):
         supported_snapshot = snapshot.clone_by_supported_fields(
             supported_fields=supported_fields
         )
-        data = supported_snapshot.serialize(
-            user_information=reader.user_information
-        )
+        user_information_to_send = reader.user_information.serialize()
+        snapshot_to_send = supported_snapshot.serialize()
+        data = b"".join(user_information_to_send, snapshot_to_send)
         headers = {
             "Content-Type": "application/octet-stream"
         }

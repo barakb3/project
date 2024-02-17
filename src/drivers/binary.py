@@ -25,7 +25,7 @@ class BinaryDriver:
         else:
             self.file: io.BufferedReader = open(path, "rb")
 
-    def get_user_information(self) -> tuple:
+    def get_user_information(self) -> UserInformation:
         id: int = from_bytes(
             data=self.file.read(UINT64_SIZE_IN_BYTES),
             data_type="uint64",
