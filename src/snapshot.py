@@ -7,7 +7,6 @@ from project_pb2 import (
     Feelings,
     Pose,
     ProtoSnapshot,
-    ProtoUserInformation,
 )
 
 NUM_BYTES_PIXEL_COLOR_IMAGE = 3  # RGB format.
@@ -150,19 +149,7 @@ class Snapshot:
             ),
         )
 
-    def serialize(self, user_information: tuple) -> bytes:
-        if user_information.gender == "m":
-            gender = ProtoUserInformation.Gender.MALE
-        elif user_information.gender == "f":
-            gender = ProtoUserInformation.Gender.FEMALE
-        elif user_information.gender == "o":
-            gender = ProtoUserInformation.Gender.OTHER
-        proto_user_information = ProtoUserInformation(
-            user_id=user_information.id,
-            username=user_information.username,
-            birthday=user_information.birthday,
-            gender=gender,
-        )
+    def serialize(self) -> bytes:
         proto_snapshot = ProtoSnapshot(
             datetime=self.timestamp,
             pose=Pose(
@@ -197,8 +184,6 @@ class Snapshot:
         )
         return b"".join(
             [
-                struct.pack("<I", proto_user_information.ByteSize()),
-                proto_user_information.SerializeToString(),
                 struct.pack("<I", proto_snapshot.ByteSize()),
                 proto_snapshot.SerializeToString(),
             ]
